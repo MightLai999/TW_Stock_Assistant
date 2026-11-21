@@ -161,6 +161,40 @@
                 <button type="button" data-asset="stock" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">僅個股</button>
                 <button type="button" data-asset="etf" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">僅 ETF</button>
               </div>
+
+              <!-- Industry Multi-Select Dropdown -->
+              <div class="relative shrink-0" id="industry-dropdown-container">
+                <button type="button" id="industry-dropdown-btn" class="inline-flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md border border-slate-300/80 dark:border-slate-700 transition-colors cursor-pointer">
+                  <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                  <span id="industry-btn-label">篩選產業 (全部)</span>
+                  <svg class="w-3 h-3 text-slate-400 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <!-- Popover Panel -->
+                <div id="industry-dropdown-menu" class="hidden absolute left-0 top-full mt-1.5 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-50 p-2.5 text-xs">
+                  <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="font-semibold text-slate-800 dark:text-slate-200">選擇產業類別</span>
+                    <div class="flex items-center gap-2">
+                      <button type="button" id="ind-select-all-btn" class="text-blue-600 dark:text-sky-400 hover:underline font-medium cursor-pointer">全選</button>
+                      <span class="text-slate-300 dark:text-slate-600">|</span>
+                      <button type="button" id="ind-clear-all-btn" class="text-slate-500 dark:text-slate-400 hover:underline cursor-pointer">清除</button>
+                    </div>
+                  </div>
+                  <!-- Search inside industries -->
+                  <div class="mb-2">
+                    <input type="text" id="ind-search-input" placeholder="快速過濾產業名稱..." class="w-full h-7 px-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <!-- Checkbox list -->
+                  <div id="industry-checkbox-list" class="max-h-56 overflow-y-auto space-y-1 pr-1">
+                    <!-- Rendered dynamically via JS -->
+                  </div>
+                  <!-- Footer confirm -->
+                  <div class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span id="ind-selected-count-text" class="text-[11px] text-slate-500 dark:text-slate-400">已選取 0 項</span>
+                    <button type="button" id="ind-apply-btn" class="px-3 py-1 bg-[#1B365D] hover:bg-[#132847] dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-medium rounded text-xs cursor-pointer transition-colors">完成</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="flex items-center gap-1.5 overflow-x-auto bg-slate-100 dark:bg-slate-800 p-1 rounded-md shrink-0" id="filter-presets-bar">
@@ -326,7 +360,7 @@
         <div class="flex flex-wrap items-center gap-2 text-slate-500 dark:text-slate-400">
           <span id="data-source-tag">資料來源：載入中...</span>
           <span class="text-slate-300 dark:text-slate-600">·</span>
-          <span>共 29 欄（左側市場、代號與公司固定）</span>
+          <span>共 40 欄（左側市場、代號與公司固定）</span>
         </div>
       </div>
 
@@ -471,7 +505,7 @@
         }
       ];
 
-      // 嚴格按照 29 個欄位順序定義（第 1 欄為「市場」）
+      // 嚴格按照 39 個欄位順序定義（前 3 欄置左固定）
       const COLUMNS = [
         { key: 'market', label: '市場', type: 'market', align: 'center', minWidth: 'w-[58px] min-w-[58px]', stickyLeft: 0 },
         { key: 'code', label: '代號', type: 'code', align: 'left', minWidth: 'w-[74px] min-w-[74px]', stickyLeft: 58 },
@@ -501,7 +535,18 @@
         { key: 'expectedDividend', label: '明年預期配息(A)', type: 'number', align: 'right', minWidth: 'min-w-[116px]', decimals: 2 },
         { key: 'expectedYield', label: '明年預期殖利率(B)', type: 'percent', align: 'right', minWidth: 'min-w-[128px]', decimals: 2, isHighYieldCol: true },
         { key: 'peRatio', label: '本益比', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
-        { key: 'pbRatio', label: '股價淨值比', type: 'number', align: 'right', minWidth: 'min-w-[102px]', decimals: 2 }
+        { key: 'pbRatio', label: '股價淨值比', type: 'number', align: 'right', minWidth: 'min-w-[102px]', decimals: 2 },
+        { key: 'sectorGroup', label: '產業大項', type: 'text', align: 'center', minWidth: 'min-w-[96px]' },
+        { key: 'industry', label: '所屬產業', type: 'text', align: 'left', minWidth: 'min-w-[120px]' },
+        { key: 'nonOpRatio', label: '淨利業外比重', type: 'percent', align: 'right', minWidth: 'min-w-[116px]', decimals: 2 },
+        { key: 'grossMarginQ1', label: '1Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'grossMarginQ2', label: '2Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'grossMarginQ3', label: '3Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'netMarginQ1', label: '1Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'netMarginQ2', label: '2Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'netMarginQ3', label: '3Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+        { key: 'grossMarginLastYear', label: '去年毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 },
+        { key: 'netMarginLastYear', label: '去年淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 }
       ];
 
       let allStocks = [...initialStocksData];
@@ -515,6 +560,7 @@
         keyword: '',
         market: 'all',
         assetType: 'all',
+        selectedIndustries: [], // 空陣列表示不特別限制（全部產業）
         qualityDividendOnly: false,
         minCashYield: '',
         minTotalYield: '',
@@ -650,6 +696,7 @@
         }
 
         renderMetaBar(activeMeta);
+        populateIndustryList();
         render();
       }
 
@@ -686,6 +733,10 @@
             if (filters.assetType === 'etf' && !isEtf) return false;
             if (filters.assetType === 'stock' && isEtf) return false;
           }
+          if (Array.isArray(filters.selectedIndustries) && filters.selectedIndustries.length > 0) {
+            const ind = s.industry || s.category || '其他';
+            if (!filters.selectedIndustries.includes(ind)) return false;
+          }
           if (filters.qualityDividendOnly) {
             const positiveEps =
               typeof s.epsLastYear === 'number' && s.epsLastYear > 0 &&
@@ -702,7 +753,9 @@
               String(s.code).toLowerCase().includes(kw) ||
               String(s.name).toLowerCase().includes(kw) ||
               String(s.market || '').toLowerCase().includes(kw) ||
-              (s.category && String(s.category).toLowerCase().includes(kw));
+              (s.category && String(s.category).toLowerCase().includes(kw)) ||
+              (s.industry && String(s.industry).toLowerCase().includes(kw)) ||
+              (s.sectorGroup && String(s.sectorGroup).toLowerCase().includes(kw));
             if (!hit) return false;
           }
           if (minCash !== null && (s.cashYield === null || s.cashYield === undefined || s.cashYield < minCash)) return false;
@@ -758,13 +811,18 @@
           const isSticky = col.stickyLeft !== undefined;
           const isLastSticky = idx === 2;
 
+          let thTitleAttr = '';
+          if (col.key === 'nonOpRatio') {
+            thTitleAttr = 'title="公式：(稅前純益率 - 營業利益率) ÷ 稅前純益率 × 100%（衡量獲利來自營業外收支之佔比）"';
+          }
+
           html += `
-            <th scope="col" style="${isSticky ? `left: ${col.stickyLeft}px;` : ''}"
+            <th scope="col" ${thTitleAttr} style="${isSticky ? `left: ${col.stickyLeft}px;` : ''}"
                 class="sticky top-0 select-none border-b border-slate-300 p-0 whitespace-nowrap ${col.minWidth}
                        ${isSticky ? 'z-30' : 'z-20'}
                        ${isLastSticky ? 'border-r border-slate-400/70 shadow-[3px_0_6px_-3px_rgba(15,23,42,0.18)]' : 'border-r border-slate-200/20'}
                        ${isSorted ? 'bg-[#122642] text-white' : 'bg-[#1E3A5F] text-slate-100 hover:bg-[#173050]'}">
-              <button type="button" data-key="${col.key}"
+              <button type="button" data-key="${col.key}" ${thTitleAttr}
                       class="sort-th-btn w-full h-10 px-2.5 flex items-center gap-1 font-semibold text-xs tracking-wide cursor-pointer
                              ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}">
                 <span>${col.label}</span>
@@ -855,6 +913,13 @@
               textClass = 'font-mono tabular-nums text-emerald-700 dark:text-emerald-400';
             } else if (isEmpty) {
               textClass = 'font-mono text-slate-300 dark:text-slate-600';
+            } else if (col.key === 'sectorGroup') {
+              if (rawVal === '電子') textClass = 'font-semibold text-blue-600 dark:text-blue-400';
+              else if (rawVal === '傳產') textClass = 'font-semibold text-emerald-600 dark:text-emerald-400';
+              else if (rawVal === '金融') textClass = 'font-semibold text-amber-600 dark:text-amber-400';
+              else textClass = 'text-slate-500 dark:text-slate-400';
+            } else if (col.key === 'industry') {
+              textClass = 'font-medium text-slate-700 dark:text-slate-300';
             } else if (col.type !== 'text') {
               textClass = 'font-mono tabular-nums text-slate-800 dark:text-slate-200';
             }
@@ -873,6 +938,8 @@
               titleAttr = `title="預估今年EPS ${(stock.epsYTD / bench).toFixed(2)} × 現金配息率 ${((stock.cashDividend / stock.epsLastYear) * 100).toFixed(1)}%"`;
             } else if (col.key === 'expectedYield' && rawVal !== null && rawVal !== undefined && stock.expectedDividend != null && stock.price) {
               titleAttr = `title="明年預期配息 ${stock.expectedDividend} ÷ 最新股價 ${stock.price}"`;
+            } else if (col.key === 'nonOpRatio' && rawVal !== null && rawVal !== undefined) {
+              titleAttr = `title="淨利業外比重：${rawVal}% (公式：(稅前純益率 - 營業利益率) ÷ 稅前純益率 × 100%)"`;
             }
 
             html += `
@@ -1020,12 +1087,123 @@
         });
       });
 
+      // Industry Multi-Select Dropdown Logic
+      const indDropdownBtn = document.getElementById('industry-dropdown-btn');
+      const indDropdownMenu = document.getElementById('industry-dropdown-menu');
+      const indCheckboxList = document.getElementById('industry-checkbox-list');
+      const indBtnLabel = document.getElementById('industry-btn-label');
+      const indSelectedCountText = document.getElementById('ind-selected-count-text');
+      const indSearchInput = document.getElementById('ind-search-input');
+      const indSelectAllBtn = document.getElementById('ind-select-all-btn');
+      const indClearAllBtn = document.getElementById('ind-clear-all-btn');
+      const indApplyBtn = document.getElementById('ind-apply-btn');
+
+      let allIndustryNames = [];
+
+      function populateIndustryList() {
+        const indSet = new Set();
+        allStocks.forEach(s => {
+          const ind = s.industry || s.category || '其他';
+          if (ind) indSet.add(ind);
+        });
+        allIndustryNames = Array.from(indSet).sort((a, b) => a.localeCompare(b, 'zh-Hant-TW'));
+        renderIndustryCheckboxes();
+        updateIndustryCheckboxUI();
+      }
+
+      function renderIndustryCheckboxes(keyword = '') {
+        const kw = keyword.trim().toLowerCase();
+        const filtered = allIndustryNames.filter(name => !kw || name.toLowerCase().includes(kw));
+
+        if (filtered.length === 0) {
+          indCheckboxList.innerHTML = '<div class="py-3 text-center text-slate-400">查無符合產業</div>';
+          return;
+        }
+
+        let html = '';
+        filtered.forEach(name => {
+          const isChecked = filters.selectedIndustries.includes(name);
+          html += `
+            <label class="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer select-none">
+              <input type="checkbox" data-ind="${name}" ${isChecked ? 'checked' : ''} class="ind-checkbox rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer" />
+              <span class="text-xs text-slate-700 dark:text-slate-200">${name}</span>
+            </label>
+          `;
+        });
+        indCheckboxList.innerHTML = html;
+
+        indCheckboxList.querySelectorAll('.ind-checkbox').forEach(cb => {
+          cb.addEventListener('change', (e) => {
+            const name = e.target.getAttribute('data-ind');
+            if (e.target.checked) {
+              if (!filters.selectedIndustries.includes(name)) filters.selectedIndustries.push(name);
+            } else {
+              filters.selectedIndustries = filters.selectedIndustries.filter(x => x !== name);
+            }
+            updateIndustryCheckboxUI();
+          });
+        });
+      }
+
+      function updateIndustryCheckboxUI() {
+        const count = filters.selectedIndustries.length;
+        if (count === 0) {
+          indBtnLabel.textContent = '篩選產業 (全部)';
+          indSelectedCountText.textContent = '已選取 0 項（全部顯示）';
+          indDropdownBtn.classList.remove('border-blue-500', 'text-blue-700', 'dark:text-sky-300', 'bg-blue-50/50', 'dark:bg-sky-950/40');
+        } else {
+          indBtnLabel.textContent = `產業 (${count})`;
+          indSelectedCountText.textContent = `已選取 ${count} 項產業`;
+          indDropdownBtn.classList.add('border-blue-500', 'text-blue-700', 'dark:text-sky-300', 'bg-blue-50/50', 'dark:bg-sky-950/40');
+        }
+        // Sync checkboxes in case open
+        indCheckboxList.querySelectorAll('.ind-checkbox').forEach(cb => {
+          const name = cb.getAttribute('data-ind');
+          cb.checked = filters.selectedIndustries.includes(name);
+        });
+      }
+
+      indDropdownBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        indDropdownMenu.classList.toggle('hidden');
+      });
+
+      indSelectAllBtn?.addEventListener('click', () => {
+        filters.selectedIndustries = [...allIndustryNames];
+        updateIndustryCheckboxUI();
+      });
+
+      indClearAllBtn?.addEventListener('click', () => {
+        filters.selectedIndustries = [];
+        updateIndustryCheckboxUI();
+      });
+
+      indSearchInput?.addEventListener('input', (e) => {
+        renderIndustryCheckboxes(e.target.value);
+      });
+
+      indApplyBtn?.addEventListener('click', () => {
+        indDropdownMenu.classList.add('hidden');
+        currentPage = 1;
+        scrollTableTop();
+        updateFilterStatusText();
+        render();
+      });
+
+      // Close dropdown if clicked outside
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('industry-dropdown-container')?.contains(e.target)) {
+          indDropdownMenu?.classList.add('hidden');
+        }
+      });
+
       function updateFilterStatusText() {
         const descEl = document.getElementById('filter-status-desc');
         let activeCount = 0;
         if (filters.keyword.trim()) activeCount++;
         if (filters.market !== 'all') activeCount++;
         if (filters.assetType !== 'all') activeCount++;
+        if (filters.selectedIndustries.length > 0) activeCount++;
         if (filters.qualityDividendOnly) activeCount++;
         ['minCashYield', 'minTotalYield', 'minPayoutRatio', 'maxPayoutRatio', 'minDivCount10Y', 'minAvgDiv10Y', 'maxPeRatio', 'maxPbRatio', 'minInsiderHolding', 'minEpsProgress', 'minExpectedYield', 'exDividendMonth'].forEach(k => {
           if (filters[k] !== '') activeCount++;
@@ -1068,7 +1246,7 @@
 
       function resetFilters() {
         filters = {
-          keyword: '', market: 'all', assetType: 'all', qualityDividendOnly: false,
+          keyword: '', market: 'all', assetType: 'all', selectedIndustries: [], qualityDividendOnly: false,
           minCashYield: '', minTotalYield: '', minPayoutRatio: '', maxPayoutRatio: '', minDivCount10Y: '',
           minAvgDiv10Y: '', maxPeRatio: '', maxPbRatio: '', minInsiderHolding: '',
           minEpsProgress: '', minExpectedYield: '', exDividendMonth: ''
@@ -1091,6 +1269,7 @@
 
         updateMarketPills('all');
         updateAssetPills('all');
+        updateIndustryCheckboxUI();
         updatePresetButtons('all');
         updateFilterStatusText();
         currentPage = 1;
@@ -1247,6 +1426,7 @@
             allStocks = normalizeRecords(data);
             document.getElementById('data-source-tag').textContent = `資料來源：自訂 ${file.name} (${allStocks.length} 檔)`;
             renderMetaBar({ updatedAt: `手動匯入（${file.name}）`, priceDate: '-', epsPeriod: '-', total: allStocks.length });
+            populateIndustryList();
             resetFilters();
           } else {
             alert('JSON 格式必須為陣列，且至少需有一筆資料。');

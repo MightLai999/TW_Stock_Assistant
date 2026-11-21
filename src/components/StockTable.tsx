@@ -27,11 +27,16 @@ export const StockTable: React.FC<StockTableProps> = ({
                 const isSorted = sortConfig.key === col.key;
                 const isSticky = col.stickyLeft !== undefined;
                 const isLastSticky = idx === 2;
+                const thTitle =
+                  col.key === 'nonOpRatio'
+                    ? '公式：(稅前純益率 - 營業利益率) ÷ 稅前純益率 × 100%（衡量獲利來自營業外收支之佔比）'
+                    : `點擊以「${col.label}」切換升冪 / 降冪排序`;
 
                 return (
                   <th
                     key={col.key}
                     scope="col"
+                    title={thTitle}
                     aria-sort={
                       isSorted
                         ? sortConfig.direction === 'asc'
@@ -192,6 +197,17 @@ export const StockTable: React.FC<StockTableProps> = ({
                             : rawValue < bench
                             ? 'font-mono tabular-nums text-emerald-700'
                             : 'font-mono tabular-nums text-slate-800';
+                      } else if (col.key === 'sectorGroup') {
+                        textClass =
+                          rawValue === '電子'
+                            ? 'font-semibold text-blue-600'
+                            : rawValue === '傳產'
+                            ? 'font-semibold text-emerald-600'
+                            : rawValue === '金融'
+                            ? 'font-semibold text-amber-600'
+                            : 'text-slate-500';
+                      } else if (col.key === 'industry') {
+                        textClass = 'font-medium text-slate-700';
                       } else if (isHighCashYield) {
                         // Explicitly highlight yield > 5% in deep crimson red
                         textClass = 'font-mono tabular-nums font-bold text-[#991B1B]';
@@ -218,6 +234,8 @@ export const StockTable: React.FC<StockTableProps> = ({
                         titleText = `依除息前一日收盤價 ${stock.preExPrice} 元計算`;
                       } else if (col.key === 'epsProgressRatio' && typeof rawValue === 'number') {
                         titleText = `今年累積EPS ${stock.epsYTD} ÷ 去年EPS ${stock.epsLastYear}（基準 ${bench.toFixed(2)}）`;
+                      } else if (col.key === 'nonOpRatio' && typeof rawValue === 'number') {
+                        titleText = `淨利業外比重：${rawValue}% (公式：(稅前純益率 - 營業利益率) ÷ 稅前純益率 × 100%)`;
                       }
 
                       return (

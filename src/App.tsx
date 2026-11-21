@@ -271,7 +271,9 @@ export default function App() {
           s.code.toLowerCase().includes(kw) ||
           s.name.toLowerCase().includes(kw) ||
           (s.market ? s.market.toLowerCase().includes(kw) : false) ||
-          (s.category ? s.category.toLowerCase().includes(kw) : false);
+          (s.category ? s.category.toLowerCase().includes(kw) : false) ||
+          (s.industry ? s.industry.toLowerCase().includes(kw) : false) ||
+          (s.sectorGroup ? s.sectorGroup.toLowerCase().includes(kw) : false);
         if (!matchesKeyword) return false;
       }
 
@@ -559,7 +561,7 @@ export default function App() {
           <div className="flex items-center gap-2 text-slate-500">
             <span>資料來源：{dataSourceLabel}</span>
             <span className="text-slate-300" aria-hidden="true">·</span>
-            <span>共 29 欄（可橫向捲動，左側市場、代號與公司固定）</span>
+            <span>共 40 欄（可橫向捲動，左側市場、代號與公司固定）</span>
           </div>
         </div>
 

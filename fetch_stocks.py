@@ -92,6 +92,7 @@ INDUSTRY_CODE_MAP = {
     "37": "運動休閒",
     "38": "居家生活",
     "80": "管理股票",
+    "91": "存託憑證",
 }
 
 
@@ -232,7 +233,38 @@ def resolve_industry(raw_ind):
         return INDUSTRY_CODE_MAP[s]
     if s.isdigit() and s.zfill(2) in INDUSTRY_CODE_MAP:
         return INDUSTRY_CODE_MAP[s.zfill(2)]
+    if s == "金融業":
+        return "金融保險業"
+    if s == "農業科技":
+        return "農業科技業"
     return s
+
+
+def classify_sector_group(industry_name, is_etf=False):
+    """
+    歸類四大產業大項：傳產、電子、金融、其他(ETF)
+    """
+    if is_etf or not industry_name:
+        return "其他(ETF)"
+    ind = str(industry_name).strip()
+    if "ETF" in ind or ind in ("存託憑證", "管理股票"):
+        return "其他(ETF)"
+    if "金融" in ind or "保險" in ind:
+        return "金融"
+    if (
+        "半導體" in ind
+        or "電腦" in ind
+        or "光電" in ind
+        or "通信" in ind
+        or "電子" in ind
+        or "資訊服務" in ind
+        or "數位雲端" in ind
+        or "電子商務" in ind
+    ):
+        return "電子"
+    if ind in ("其他", "綜合"):
+        return "其他(ETF)"
+    return "傳產"
 
 
 def compute_insider_holdings(rows, issued_shares_map):
@@ -265,6 +297,84 @@ def compute_insider_holdings(rows, issued_shares_map):
             if 0.0 <= pct <= 100.0:
                 ratio_map[code] = pct
     return ratio_map
+
+
+def fetch_mops_margins_bulk(typek, roc_year, season):
+    """
+    抓取 MOPS 營益分析彙總表（ajax_t163sb06）全公司單季/年度毛利率與稅後純益率（淨利率）。
+    """
+    url = "https://mopsov.twse.com.tw/mops/web/ajax_t163sb06"
+    html = fetch_text(
+        url,
+        post_data={
+            "encodeURIComponent": "1",
+            "step": "1",
+            "firstin": "1",
+            "off": "1",
+            "isQuery": "Y",
+            "TYPEK": typek,
+            "year": str(roc_year),
+            "season": f"{season:02d}",
+        },
+        timeout=30,
+    )
+    res_map = {}
+    if not html:
+        return res_map
+    parser = TableParser()
+    parser.feed(html)
+    for tbl in parser.tables:
+        if not tbl:
+            continue
+        header = tbl[0]
+        gross_idx = next((i for i, h in enumerate(header) if "毛利率" in h), None)
+        op_idx = next((i for i, h in enumerate(header) if "營業利益率" in h), None)
+        pretax_idx = next((i for i, h in enumerate(header) if "稅前純益率" in h or "稅前淨利率" in h), None)
+        net_idx = next((i for i, h in enumerate(header) if "稅後純益率" in h or "純益率" in h or "淨利率" in h), None)
+        if gross_idx is None and net_idx is None and pretax_idx is None:
+            continue
+        for row in tbl[1:]:
+            if len(row) <= 2:
+                continue
+            code = row[0].strip()
+            if not code or not code[0].isdigit():
+                continue
+            gross_val = (
+                parse_float(row[gross_idx], round_digits=2)
+                if gross_idx is not None and len(row) > gross_idx
+                else None
+            )
+            op_val = (
+                parse_float(row[op_idx], round_digits=2)
+                if op_idx is not None and len(row) > op_idx
+                else None
+            )
+            pretax_val = (
+                parse_float(row[pretax_idx], round_digits=2)
+                if pretax_idx is not None and len(row) > pretax_idx
+                else None
+            )
+            net_val = (
+                parse_float(row[net_idx], round_digits=2)
+                if net_idx is not None and len(row) > net_idx
+                else None
+            )
+
+            # 方案 A 淨利業外比重：(稅前純益率 - 營業利益率) / 稅前純益率 * 100%
+            non_op_ratio = None
+            if pretax_val is not None and op_val is not None and pretax_val != 0:
+                raw_ratio = ((pretax_val - op_val) / pretax_val) * 100.0
+                non_op_ratio = round(raw_ratio, 2)
+
+            if gross_val is not None or net_val is not None or non_op_ratio is not None:
+                res_map[code] = {
+                    "grossMargin": gross_val,
+                    "opMargin": op_val,
+                    "pretaxMargin": pretax_val,
+                    "netMargin": net_val,
+                    "nonOpRatio": non_op_ratio,
+                }
+    return res_map
 
 
 def fetch_mops_eps_bulk(typek, roc_year, season):
@@ -465,15 +575,15 @@ def fetch_tpex_etf_dividends(year_ad, etf_codes, pre_ex_price_out=None):
 
 def load_cache(cache_path, disabled=False):
     if disabled or not os.path.exists(cache_path):
-        return {"eps": {}, "div_mops": {}, "div_etf_twse": {}, "div_etf_tpex": {}}
+        return {"eps": {}, "margins": {}, "div_mops": {}, "div_etf_twse": {}, "div_etf_tpex": {}}
     try:
         with open(cache_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            for k in ("eps", "div_mops", "div_etf_twse", "div_etf_tpex"):
+            for k in ("eps", "margins", "div_mops", "div_etf_twse", "div_etf_tpex"):
                 data.setdefault(k, {})
             return data
     except Exception:
-        return {"eps": {}, "div_mops": {}, "div_etf_twse": {}, "div_etf_tpex": {}}
+        return {"eps": {}, "margins": {}, "div_mops": {}, "div_etf_twse": {}, "div_etf_tpex": {}}
 
 
 def save_cache(cache_path, cache_data):
@@ -839,6 +949,30 @@ def main():
         # 已完成較久之季度仍每週抓或只抓最新兩季，確保財報重編也能同步
         eps_cum[q] = get_eps_period(eps_roc_year, q, allow_cache=False)
 
+    # 抓取各季毛利率與淨利率（營益分析彙總表 ajax_t163sb06）
+    print("   → 抓取 MOPS (ajax_t163sb06) 全市場 Q1~Q3 與去年 毛利率 / 淨利率...")
+
+    def get_margins_period(yr_roc, q_num, allow_cache=False):
+        cache_key = f"{yr_roc}Q{q_num}"
+        if allow_cache and cache_key in cache["margins"] and len(cache["margins"][cache_key]) > 1000:
+            print(f"     [快取] {yr_roc + 1911} Q{q_num} 毛利/淨利率 ({len(cache['margins'][cache_key])} 檔)")
+            return cache["margins"][cache_key]
+
+        merged = {}
+        for typek in ("sii", "otc"):
+            part = fetch_mops_margins_bulk(typek, yr_roc, q_num)
+            merged.update(part)
+            time.sleep(0.45)
+        print(f"     [抓取] {yr_roc + 1911} Q{q_num} 毛利/淨利率 ({len(merged)} 檔)")
+        if allow_cache and len(merged) > 1000:
+            cache["margins"][cache_key] = merged
+        return merged
+
+    margins_last_year_map = get_margins_period(eps_roc_year - 1, 4, allow_cache=True)
+    margins_by_q = {}
+    for q in range(1, latest_q + 1):
+        margins_by_q[q] = get_margins_period(eps_roc_year, q, allow_cache=True)
+
     # ------------------------------------------------------------------
     # [4/6] 抓取 10 年除權息與發息日資料（MOPS t108sb27 + 預告表 + ETF）
     # ------------------------------------------------------------------
@@ -1118,6 +1252,34 @@ def main():
             expected_div = None
             expected_yield = None
 
+        # 毛利率與淨利率（單季與去年）以及淨利業外比重（方案 A）
+        if is_etf:
+            gross_q1 = gross_q2 = gross_q3 = gross_ly = None
+            net_q1 = net_q2 = net_q3 = net_ly = None
+            non_op_ratio = None
+        else:
+            m_q1 = margins_by_q.get(1, {}).get(code) or {}
+            m_q2 = margins_by_q.get(2, {}).get(code) or {}
+            m_q3 = margins_by_q.get(3, {}).get(code) or {}
+            m_ly = margins_last_year_map.get(code) or {}
+
+            gross_q1 = m_q1.get("grossMargin")
+            gross_q2 = m_q2.get("grossMargin")
+            gross_q3 = m_q3.get("grossMargin")
+            gross_ly = m_ly.get("grossMargin")
+
+            net_q1 = m_q1.get("netMargin")
+            net_q2 = m_q2.get("netMargin")
+            net_q3 = m_q3.get("netMargin")
+            net_ly = m_ly.get("netMargin")
+
+            # 優先取最新季（Q3 -> Q2 -> Q1）之淨利業外比重
+            latest_m = m_q3 if m_q3.get("nonOpRatio") is not None else (m_q2 if m_q2.get("nonOpRatio") is not None else m_q1)
+            non_op_ratio = latest_m.get("nonOpRatio")
+
+        sector_group = classify_sector_group(meta.get("category"), is_etf=is_etf)
+        industry_name = "ETF" if is_etf else meta.get("category", "其他")
+
         records.append(
             {
                 "market": meta["market"],
@@ -1153,6 +1315,17 @@ def main():
                 "expectedYield": expected_yield,
                 "peRatio": pe,
                 "pbRatio": pb,
+                "sectorGroup": sector_group,
+                "industry": industry_name,
+                "grossMarginQ1": gross_q1,
+                "grossMarginQ2": gross_q2,
+                "grossMarginQ3": gross_q3,
+                "netMarginQ1": net_q1,
+                "netMarginQ2": net_q2,
+                "netMarginQ3": net_q3,
+                "grossMarginLastYear": gross_ly,
+                "netMarginLastYear": net_ly,
+                "nonOpRatio": non_op_ratio,
             }
         )
 

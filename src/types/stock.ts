@@ -65,6 +65,28 @@ export interface StockRecord {
   peRatio: number | null;
   /** 股價淨值比（倍） */
   pbRatio: number | null;
+  /** 產業大項（傳產 / 電子 / 金融 / 其他(ETF)） */
+  sectorGroup?: '傳產' | '電子' | '金融' | '其他(ETF)' | string;
+  /** 所屬產業（台股官方登記產業名稱） */
+  industry?: string;
+  /** 1Q 毛利率（%） */
+  grossMarginQ1?: number | null;
+  /** 2Q 毛利率（%） */
+  grossMarginQ2?: number | null;
+  /** 3Q 毛利率（%） */
+  grossMarginQ3?: number | null;
+  /** 1Q 淨利率（%） */
+  netMarginQ1?: number | null;
+  /** 2Q 淨利率（%） */
+  netMarginQ2?: number | null;
+  /** 3Q 淨利率（%） */
+  netMarginQ3?: number | null;
+  /** 去年毛利率（%） */
+  grossMarginLastYear?: number | null;
+  /** 去年淨利率（%） */
+  netMarginLastYear?: number | null;
+  /** 淨利業外比重（方案 A: (稅前純益率 - 營業利益率) / 稅前純益率 * 100%） */
+  nonOpRatio?: number | null;
 }
 
 export type StockColumnKey =
@@ -96,7 +118,18 @@ export type StockColumnKey =
   | 'expectedDividend'
   | 'expectedYield'
   | 'peRatio'
-  | 'pbRatio';
+  | 'pbRatio'
+  | 'sectorGroup'
+  | 'industry'
+  | 'nonOpRatio'
+  | 'grossMarginQ1'
+  | 'grossMarginQ2'
+  | 'grossMarginQ3'
+  | 'netMarginQ1'
+  | 'netMarginQ2'
+  | 'netMarginQ3'
+  | 'grossMarginLastYear'
+  | 'netMarginLastYear';
 
 export type SortDirection = 'asc' | 'desc';
 

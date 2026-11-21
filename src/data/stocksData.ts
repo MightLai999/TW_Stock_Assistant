@@ -391,6 +391,17 @@ export const TABLE_COLUMNS: ColumnDefinition[] = [
   },
   { key: 'peRatio', label: '本益比', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
   { key: 'pbRatio', label: '股價淨值比', type: 'number', align: 'right', minWidth: 'min-w-[102px]', decimals: 2 },
+  { key: 'sectorGroup', label: '產業大項', type: 'text', align: 'center', minWidth: 'min-w-[100px]' },
+  { key: 'industry', label: '所屬產業', type: 'text', align: 'left', minWidth: 'min-w-[120px]' },
+  { key: 'nonOpRatio', label: '淨利業外比重', type: 'percent', align: 'right', minWidth: 'min-w-[116px]', decimals: 2 },
+  { key: 'grossMarginQ1', label: '1Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'grossMarginQ2', label: '2Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'grossMarginQ3', label: '3Q毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'netMarginQ1', label: '1Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'netMarginQ2', label: '2Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'netMarginQ3', label: '3Q淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[96px]', decimals: 2 },
+  { key: 'grossMarginLastYear', label: '去年毛利率', type: 'percent', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 },
+  { key: 'netMarginLastYear', label: '去年淨利率', type: 'percent', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 },
 ];
 
 export const EMPTY_FILTERS: NumericFilterCriteria = {
