@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar, Upload } from 'lucide-react';
+import { Calendar, Moon, Sun, Upload } from 'lucide-react';
 import { DataGuideModal } from './components/DataGuideModal';
 import { FilterPanel } from './components/FilterPanel';
 import { StockTable } from './components/StockTable';
@@ -84,6 +84,34 @@ export default function App() {
 
   // Data guide / JSON import modal
   const [isDataModalOpen, setIsDataModalOpen] = useState<boolean>(false);
+
+  // Theme state: dark vs light
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      // ignore localStorage errors
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
 
   const loadDefaultJson = useCallback(async () => {
     setLoading(true);
@@ -415,8 +443,21 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Zone 3: Single Primary Action */}
-          <div className="flex items-center shrink-0">
+          {/* Zone 3: Actions (Theme Toggle & Load JSON) */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'}
+              title={theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-600" />
+              )}
+            </button>
             <button
               type="button"
               onClick={() => setIsDataModalOpen(true)}

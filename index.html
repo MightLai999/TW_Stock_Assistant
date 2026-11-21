@@ -14,6 +14,7 @@
     />
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -31,6 +32,18 @@
         }
       }
     </script>
+    <script>
+      // 提早套用主題色避免白色閃爍 (FOUC)
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
     <style>
       body {
         font-family: "Plus Jakarta Sans", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
@@ -42,37 +55,55 @@
       .table-scroll::-webkit-scrollbar-track {
         background: #f1f5f9;
       }
+      .dark .table-scroll::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
       .table-scroll::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border: 2px solid #f1f5f9;
         border-radius: 6px;
       }
+      .dark .table-scroll::-webkit-scrollbar-thumb {
+        background: #334155;
+        border: 2px solid #0f172a;
+      }
       .table-scroll::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
+      }
+      .dark .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #475569;
       }
       .tabular-nums {
         font-variant-numeric: tabular-nums;
       }
     </style>
   </head>
-  <body class="bg-[#F5F7FA] text-slate-900 antialiased min-h-screen flex flex-col">
+  <body class="bg-[#F5F7FA] dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-150">
     <!-- Top Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <header class="bg-white dark:bg-[#111827] border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
       <div class="max-w-[1720px] mx-auto px-4 lg:px-6 min-h-14 py-1.5 flex items-center justify-between gap-4 lg:gap-8">
         <div class="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 min-w-0">
-          <a href="#" id="brand-link" class="text-[17px] font-bold tracking-tight text-[#1B365D] whitespace-nowrap shrink-0">
+          <a href="#" id="brand-link" class="text-[17px] font-bold tracking-tight text-[#1B365D] dark:text-sky-400 whitespace-nowrap shrink-0">
             台股殖利率小幫手2026
           </a>
-          <span id="brand-credit" class="text-[11px] font-normal text-slate-400 tracking-normal whitespace-pre">Author: Might.LAI  Development Tools: Google Antigravity</span>
+          <span id="brand-credit" class="text-[11px] font-normal text-slate-400 dark:text-slate-500 tracking-normal whitespace-pre">Author: Might.LAI  Development Tools: Google Antigravity</span>
         </div>
-        <nav class="hidden md:flex items-center gap-6 text-[13px] font-medium text-slate-600" id="preset-nav">
-          <button type="button" data-preset="all" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium text-[#1B365D] whitespace-nowrap shrink-0">殖利率總表</button>
-          <button type="button" data-preset="high-yield-5" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">高息 5%+</button>
-          <button type="button" data-preset="steady-10y" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">10年存股</button>
-          <button type="button" id="open-guide-btn" class="hover:text-[#1B365D] transition-colors cursor-pointer whitespace-nowrap shrink-0">資料格式與更新</button>
+        <nav class="hidden md:flex items-center gap-6 text-[13px] font-medium text-slate-600 dark:text-slate-300" id="preset-nav">
+          <button type="button" data-preset="all" class="preset-btn hover:text-[#1B365D] dark:hover:text-sky-400 transition-colors cursor-pointer font-medium text-[#1B365D] dark:text-sky-400 whitespace-nowrap shrink-0">殖利率總表</button>
+          <button type="button" data-preset="high-yield-5" class="preset-btn hover:text-[#1B365D] dark:hover:text-sky-400 transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">高息 5%+</button>
+          <button type="button" data-preset="steady-10y" class="preset-btn hover:text-[#1B365D] dark:hover:text-sky-400 transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">10年存股</button>
+          <button type="button" id="open-guide-btn" class="hover:text-[#1B365D] dark:hover:text-sky-400 transition-colors cursor-pointer whitespace-nowrap shrink-0">資料格式與更新</button>
         </nav>
-        <div class="flex items-center shrink-0">
-          <button type="button" id="upload-json-btn" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+        <div class="flex items-center gap-2.5 shrink-0">
+          <!-- Theme Toggle Button -->
+          <button type="button" id="theme-toggle-btn" aria-label="切換深淺色主題" title="切換深色 / 淺色主題" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+            <!-- Sun Icon (shown in dark mode) -->
+            <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- Moon Icon (shown in light mode) -->
+            <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          </button>
+
+          <button type="button" id="upload-json-btn" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] dark:bg-sky-600 dark:hover:bg-sky-500 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
             <span>載入 JSON</span>
           </button>
@@ -83,28 +114,28 @@
     <!-- Main Content -->
     <main class="flex-1 max-w-[1720px] w-full mx-auto px-4 lg:px-6 py-4 flex flex-col gap-3">
       <!-- Data Freshness & Price Date Bar -->
-      <div id="data-freshness-bar" class="bg-slate-50/90 border border-slate-200 border-l-4 border-l-[#1B365D] rounded-lg px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
+      <div id="data-freshness-bar" class="bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 border-l-4 border-l-[#1B365D] dark:border-l-sky-500 rounded-lg px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs transition-colors">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span class="inline-flex items-center gap-1.5 text-slate-700">
-            <svg class="w-3.5 h-3.5 text-[#1B365D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="font-semibold text-[#1B365D]">資料更新日期：</span>
-            <strong id="meta-updated-date" class="font-mono tabular-nums font-bold text-slate-900">讀取中...</strong>
+          <span class="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
+            <svg class="w-3.5 h-3.5 text-[#1B365D] dark:text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="font-semibold text-[#1B365D] dark:text-sky-400">資料更新日期：</span>
+            <strong id="meta-updated-date" class="font-mono tabular-nums font-bold text-slate-900 dark:text-white">讀取中...</strong>
           </span>
-          <span class="text-slate-300" aria-hidden="true">·</span>
-          <span class="text-slate-700">
-            <span class="font-semibold text-[#1B365D]">收盤股價日期：</span>
-            <strong id="meta-price-date" class="font-mono tabular-nums font-bold text-slate-900">-</strong>
+          <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">·</span>
+          <span class="text-slate-700 dark:text-slate-200">
+            <span class="font-semibold text-[#1B365D] dark:text-sky-400">收盤股價日期：</span>
+            <strong id="meta-price-date" class="font-mono tabular-nums font-bold text-slate-900 dark:text-white">-</strong>
           </span>
         </div>
-        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-500">
-          <span>財報基準：<span id="meta-eps-period" class="font-mono tabular-nums text-slate-700 font-medium">-</span></span>
-          <span class="text-slate-300" aria-hidden="true">·</span>
+        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-500 dark:text-slate-400">
+          <span>財報基準：<span id="meta-eps-period" class="font-mono tabular-nums text-slate-700 dark:text-slate-200 font-medium">-</span></span>
+          <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">·</span>
           <span id="meta-universe-desc">上市 / 上櫃全市場</span>
         </div>
       </div>
 
       <!-- Filter Panel -->
-      <section class="bg-white border border-slate-200 rounded-lg px-4 py-3.5">
+      <section class="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3.5 transition-colors shadow-xs">
         <form id="filter-form" class="space-y-3">
           <!-- Keyword + Market / Asset Type + Quick Presets -->
           <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
@@ -113,142 +144,142 @@
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </span>
-                <input type="text" id="keyword-input" placeholder="搜尋代號、名稱、市場或產業（例：2330、半導體、上櫃）" class="w-full h-9 pl-9 pr-8 text-sm bg-slate-50 border border-slate-300 rounded-md text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D] transition-colors" />
-                <button type="button" id="clear-kw-btn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 items-center justify-center text-slate-400 hover:text-slate-700 text-xs font-semibold rounded">×</button>
+                <input type="text" id="keyword-input" placeholder="搜尋代號、名稱、市場或產業（例：2330、半導體、上櫃）" class="w-full h-9 pl-9 pr-8 text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500 transition-colors" />
+                <button type="button" id="clear-kw-btn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-semibold rounded">×</button>
               </div>
 
               <!-- Market Filter Segmented Control -->
-              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-md shrink-0" role="group" aria-label="市場別篩選">
-                <button type="button" data-market="all" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部市場</button>
-                <button type="button" data-market="上市" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">上市</button>
-                <button type="button" data-market="上櫃" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">上櫃</button>
+              <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-md shrink-0" role="group" aria-label="市場別篩選">
+                <button type="button" data-market="all" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs">全部市場</button>
+                <button type="button" data-market="上市" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">上市</button>
+                <button type="button" data-market="上櫃" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">上櫃</button>
               </div>
 
               <!-- Asset Type Segmented Control -->
-              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-md shrink-0" role="group" aria-label="標的類型篩選">
-                <button type="button" data-asset="all" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部標的</button>
-                <button type="button" data-asset="stock" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">僅個股</button>
-                <button type="button" data-asset="etf" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">僅 ETF</button>
+              <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-md shrink-0" role="group" aria-label="標的類型篩選">
+                <button type="button" data-asset="all" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs">全部標的</button>
+                <button type="button" data-asset="stock" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">僅個股</button>
+                <button type="button" data-asset="etf" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">僅 ETF</button>
               </div>
             </div>
 
-            <div class="flex items-center gap-1.5 overflow-x-auto bg-slate-100 p-1 rounded-md shrink-0" id="filter-presets-bar">
-              <button type="button" data-preset="all" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部</button>
-              <button type="button" id="preset-quality-dividend" data-preset="quality-dividend" title="條件：去年與今年Q1~Q3 EPS皆>0、業績進度(X)>0.75、今年配息率<=100%、明年預期殖利率(B)>=5%" class="preset-pill px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border-2 border-blue-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer">配息優股</button>
-              <button type="button" data-preset="high-yield-5" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">現金殖利率 5%+</button>
-              <button type="button" data-preset="growth-yield" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">業績成長＋預期高息 (X≥0.75, B≥5%)</button>
-              <button type="button" data-preset="steady-10y" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">10年連續配息＋4%+</button>
-              <button type="button" data-preset="value-pe" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">價值股 (PE ≤ 17)</button>
-              <button type="button" data-preset="july-ex" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">7月除息股</button>
+            <div class="flex items-center gap-1.5 overflow-x-auto bg-slate-100 dark:bg-slate-800 p-1 rounded-md shrink-0" id="filter-presets-bar">
+              <button type="button" data-preset="all" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs">全部</button>
+              <button type="button" id="preset-quality-dividend" data-preset="quality-dividend" title="條件：去年與今年Q1~Q3 EPS皆>0、業績進度(X)>0.75、今年配息率<=100%、明年預期殖利率(B)>=5%" class="preset-pill px-3 py-1 text-xs font-bold text-blue-700 dark:text-sky-300 bg-blue-50 dark:bg-sky-950/50 hover:bg-blue-100 dark:hover:bg-sky-900/60 border-2 border-blue-500 dark:border-sky-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer">配息優股</button>
+              <button type="button" data-preset="high-yield-5" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">現金殖利率 5%+</button>
+              <button type="button" data-preset="growth-yield" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">業績成長＋預期高息 (X≥0.75, B≥5%)</button>
+              <button type="button" data-preset="steady-10y" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">10年連續配息＋4%+</button>
+              <button type="button" data-preset="value-pe" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">價值股 (PE ≤ 17)</button>
+              <button type="button" data-preset="july-ex" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">7月除息股</button>
             </div>
           </div>
 
           <!-- 12 Filters -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-12 gap-2.5 pt-2.5 border-t border-slate-100">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-12 gap-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>現金殖利率</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>現金殖利率</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-minCashYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.1" min="0" id="filter-minCashYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>合計殖利率</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>合計殖利率</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-minTotalYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.1" min="0" id="filter-minTotalYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>配息率下限</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>配息率下限</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-minPayoutRatio" placeholder="例 50" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.1" min="0" id="filter-minPayoutRatio" placeholder="例 50" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>配息率上限</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>配息率上限</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&lt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-maxPayoutRatio" placeholder="例 100" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.1" min="0" id="filter-maxPayoutRatio" placeholder="例 100" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>10年股利次數</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>10年股利次數</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="1" min="0" id="filter-minDivCount10Y" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">次</span>
+                <input type="number" step="1" min="0" id="filter-minDivCount10Y" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">次</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>10年平均股利</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>10年平均股利</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-minAvgDiv10Y" placeholder="例 1.5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">元</span>
+                <input type="number" step="0.1" min="0" id="filter-minAvgDiv10Y" placeholder="例 1.5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">元</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>本益比</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>本益比</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&lt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.5" min="0" id="filter-maxPeRatio" placeholder="例 18" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+                <input type="number" step="0.5" min="0" id="filter-maxPeRatio" placeholder="例 18" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">倍</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>股價淨值比</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>股價淨值比</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&lt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-maxPbRatio" placeholder="例 2" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+                <input type="number" step="0.1" min="0" id="filter-maxPbRatio" placeholder="例 2" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">倍</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>董監持股</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>董監持股</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.5" min="0" id="filter-minInsiderHolding" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.5" min="0" id="filter-minInsiderHolding" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>業績進度(X)</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>業績進度(X)</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.05" min="0" id="filter-minEpsProgress" placeholder="例 0.75" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+                <input type="number" step="0.05" min="0" id="filter-minEpsProgress" placeholder="例 0.75" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">倍</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>預期殖利率(B)</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>預期殖利率(B)</span><span class="font-mono text-[11px] text-slate-400 dark:text-slate-500">&gt;=</span>
               </span>
               <div class="relative flex items-center">
-                <input type="number" step="0.1" min="0" id="filter-minExpectedYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
-                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+                <input type="number" step="0.1" min="0" id="filter-minExpectedYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500" />
+                <span class="absolute right-2 text-[11px] text-slate-400 dark:text-slate-500 select-none">%</span>
               </div>
             </label>
             <label class="block">
-              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
-                <span>除息月份</span><span class="text-[11px] text-slate-400">月</span>
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 whitespace-nowrap">
+                <span>除息月份</span><span class="text-[11px] text-slate-400 dark:text-slate-500">月</span>
               </span>
-              <select id="filter-exDividendMonth" class="w-full h-8 px-2 text-xs bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D] cursor-pointer">
+              <select id="filter-exDividendMonth" class="w-full h-8 px-2 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 dark:focus:ring-sky-500/20 focus:border-[#1B365D] dark:focus:border-sky-500 cursor-pointer">
                 <option value="">全部月份</option>
                 <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
                 <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
@@ -259,20 +290,20 @@
           </div>
 
           <!-- Bottom Actions -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-100">
-            <div class="flex items-center gap-2 text-xs text-slate-500" id="filter-status-desc">
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400" id="filter-status-desc">
               <span>尚未設定數值或月份篩選條件</span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <button type="submit" class="inline-flex items-center gap-1.5 h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+              <button type="submit" class="inline-flex items-center gap-1.5 h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] dark:bg-sky-600 dark:hover:bg-sky-500 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                 <span>套用篩選</span>
               </button>
-              <button type="button" id="reset-filters-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+              <button type="button" id="reset-filters-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 <span>清除條件</span>
               </button>
-              <button type="button" id="export-csv-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-800 bg-slate-100 border border-slate-300 hover:bg-slate-200/80 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+              <button type="button" id="export-csv-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-200/80 dark:hover:bg-slate-700 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span>匯出目前結果為 CSV</span>
               </button>
@@ -282,25 +313,25 @@
       </section>
 
       <!-- Summary strip -->
-      <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-600">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-600 dark:text-slate-400">
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1" id="summary-left">
-          <span>篩選結果：<strong class="font-mono tabular-nums text-slate-900" id="stat-count">0</strong> / <span class="font-mono tabular-nums" id="stat-total">0</span> 檔（上市 <span class="font-mono tabular-nums" id="stat-listed">0</span> · 上櫃 <span class="font-mono tabular-nums" id="stat-otc">0</span>）</span>
-          <span class="text-slate-300">·</span>
-          <span>平均現金殖利率 <strong class="font-mono tabular-nums text-slate-900" id="stat-avg-yield">0.00%</strong></span>
-          <span class="text-slate-300">·</span>
-          <span>現金殖利率 &gt; 5% 共 <strong class="font-mono tabular-nums text-[#991B1B]" id="stat-over5">0</strong> 檔（深紅字凸顯）</span>
-          <span class="text-slate-300">·</span>
+          <span>篩選結果：<strong class="font-mono tabular-nums text-slate-900 dark:text-white" id="stat-count">0</strong> / <span class="font-mono tabular-nums" id="stat-total">0</span> 檔（上市 <span class="font-mono tabular-nums" id="stat-listed">0</span> · 上櫃 <span class="font-mono tabular-nums" id="stat-otc">0</span>）</span>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
+          <span>平均現金殖利率 <strong class="font-mono tabular-nums text-slate-900 dark:text-white" id="stat-avg-yield">0.00%</strong></span>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
+          <span>現金殖利率 &gt; 5% 共 <strong class="font-mono tabular-nums text-[#991B1B] dark:text-rose-400" id="stat-over5">0</strong> 檔（深紅字凸顯）</span>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
           <span>排序：<span id="stat-sort">現金殖利率（降冪 ▼）</span></span>
         </div>
-        <div class="flex flex-wrap items-center gap-2 text-slate-500">
+        <div class="flex flex-wrap items-center gap-2 text-slate-500 dark:text-slate-400">
           <span id="data-source-tag">資料來源：載入中...</span>
-          <span class="text-slate-300">·</span>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
           <span>共 29 欄（左側市場、代號與公司固定）</span>
         </div>
       </div>
 
       <!-- Main 29-Column Table -->
-      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+      <div class="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col transition-colors shadow-xs">
         <div id="table-scroll-container" class="table-scroll overflow-auto max-h-[calc(100vh-380px)] min-h-[380px]">
           <table class="w-max min-w-full border-separate border-spacing-0 text-[13px]" id="stocks-table">
             <thead id="table-head">
@@ -313,12 +344,12 @@
         </div>
 
         <!-- Pagination Bar -->
-        <div class="border-t border-slate-200 bg-slate-50/70 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+        <div class="border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex flex-wrap items-center gap-3">
             <span id="page-range-info" class="font-mono tabular-nums">顯示第 0–0 筆，共 0 筆</span>
             <label class="inline-flex items-center gap-1.5">
               <span>每頁筆數</span>
-              <select id="page-size-select" class="h-7 px-2 text-xs bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-[#1B365D] cursor-pointer">
+              <select id="page-size-select" class="h-7 px-2 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1B365D] dark:focus:border-sky-500 cursor-pointer">
                 <option value="50">50 筆</option>
                 <option value="100" selected>100 筆</option>
                 <option value="200">200 筆</option>
@@ -328,18 +359,18 @@
             </label>
           </div>
           <div class="flex items-center gap-1.5" id="pagination-controls">
-            <button type="button" id="page-first-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">第一頁</button>
-            <button type="button" id="page-prev-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">上一頁</button>
-            <span id="page-indicator" class="px-2 font-mono tabular-nums text-slate-800 whitespace-nowrap">第 1 / 1 頁</span>
-            <button type="button" id="page-next-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">下一頁</button>
-            <button type="button" id="page-last-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">最後一頁</button>
+            <button type="button" id="page-first-btn" class="h-7 px-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer text-slate-700 dark:text-slate-200">第一頁</button>
+            <button type="button" id="page-prev-btn" class="h-7 px-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer text-slate-700 dark:text-slate-200">上一頁</button>
+            <span id="page-indicator" class="px-2 font-mono tabular-nums text-slate-800 dark:text-slate-200 whitespace-nowrap">第 1 / 1 頁</span>
+            <button type="button" id="page-next-btn" class="h-7 px-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer text-slate-700 dark:text-slate-200">下一頁</button>
+            <button type="button" id="page-last-btn" class="h-7 px-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer text-slate-700 dark:text-slate-200">最後一頁</button>
           </div>
         </div>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="max-w-[1720px] w-full mx-auto px-4 lg:px-6 py-3 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2">
+    <footer class="max-w-[1720px] w-full mx-auto px-4 lg:px-6 py-3 text-[11px] text-slate-400 dark:text-slate-500 flex flex-wrap items-center justify-between gap-2">
       <span>資料來源：臺灣證券交易所 (TWSE)、櫃買中心 (TPEx) 與公開資訊觀測站 (MOPS)，雙擊「每週更新資料.bat」即可同步全台股最新資料。</span>
       <span>點擊任一欄位標題皆可切換升冪 / 降冪排序</span>
     </footer>
@@ -770,11 +801,11 @@
         if (rows.length === 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="${COLUMNS.length}" class="py-16 px-6 text-center bg-white">
+              <td colspan="${COLUMNS.length}" class="py-16 px-6 text-center bg-white dark:bg-[#111827]">
                 <div class="max-w-sm mx-auto space-y-3">
-                  <p class="text-sm font-semibold text-slate-800">沒有符合目前篩選條件的台股標的</p>
-                  <p class="text-xs text-slate-500">請嘗試放寬市場別、殖利率、本益比、除息月份或關鍵字條件。</p>
-                  <button type="button" id="empty-reset-btn" class="inline-flex items-center justify-center h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors cursor-pointer">
+                  <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">沒有符合目前篩選條件的台股標的</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">請嘗試放寬市場別、殖利率、本益比、除息月份或關鍵字條件。</p>
+                  <button type="button" id="empty-reset-btn" class="inline-flex items-center justify-center h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] dark:bg-sky-600 dark:hover:bg-sky-500 rounded-md transition-colors cursor-pointer">
                     清除所有篩選條件
                   </button>
                 </div>
@@ -788,9 +819,9 @@
         let html = '';
         rows.forEach((stock, rIdx) => {
           const isEven = rIdx % 2 === 0;
-          const rowBg = isEven ? 'bg-white' : 'bg-[#F8FAFC]';
+          const rowBg = isEven ? 'bg-white dark:bg-[#111827]' : 'bg-[#F8FAFC] dark:bg-[#0F172A]/70';
 
-          html += `<tr class="group ${rowBg} hover:bg-[#EDF4FF] transition-colors duration-100">`;
+          html += `<tr class="group ${rowBg} hover:bg-[#EDF4FF] dark:hover:bg-[#1E293B] transition-colors duration-100">`;
           COLUMNS.forEach((col, cIdx) => {
             const isSticky = col.stickyLeft !== undefined;
             const isLastSticky = cIdx === 2;
@@ -803,33 +834,33 @@
             const isEmpty = formatted === '-';
             const bench = (stock.epsQuarters || 3) / 4;
 
-            let textClass = 'text-slate-700';
+            let textClass = 'text-slate-700 dark:text-slate-300';
             if (col.key === 'market') {
-              textClass = formatted === '上櫃' ? 'text-[#0F766E] font-medium' : 'text-[#1B365D] font-medium';
+              textClass = formatted === '上櫃' ? 'text-[#0F766E] dark:text-teal-400 font-medium' : 'text-[#1B365D] dark:text-sky-400 font-medium';
             } else if (col.key === 'code') {
-              textClass = 'font-mono tabular-nums font-semibold text-[#1B365D]';
+              textClass = 'font-mono tabular-nums font-semibold text-[#1B365D] dark:text-sky-400';
             } else if (col.key === 'name') {
-              textClass = 'font-medium text-slate-900';
+              textClass = 'font-medium text-slate-900 dark:text-slate-100';
             } else if (col.key === 'capReserveStockDiv') {
               textClass = typeof rawVal === 'number' && rawVal > 0
-                ? 'font-mono tabular-nums font-semibold text-amber-700'
-                : isEmpty ? 'font-mono text-slate-300' : 'font-mono tabular-nums text-slate-400';
+                ? 'font-mono tabular-nums font-semibold text-amber-700 dark:text-amber-400'
+                : isEmpty ? 'font-mono text-slate-300 dark:text-slate-600' : 'font-mono tabular-nums text-slate-400 dark:text-slate-500';
             } else if (col.key === 'epsProgressRatio' && typeof rawVal === 'number') {
-              if (rawVal > bench) textClass = 'font-mono tabular-nums font-semibold text-[#991B1B]';
-              else if (rawVal < bench) textClass = 'font-mono tabular-nums text-emerald-700';
-              else textClass = 'font-mono tabular-nums text-slate-800';
+              if (rawVal > bench) textClass = 'font-mono tabular-nums font-semibold text-[#991B1B] dark:text-rose-400';
+              else if (rawVal < bench) textClass = 'font-mono tabular-nums text-emerald-700 dark:text-emerald-400';
+              else textClass = 'font-mono tabular-nums text-slate-800 dark:text-slate-200';
             } else if (isHighYield) {
-              textClass = 'font-mono tabular-nums font-bold text-[#991B1B]';
+              textClass = 'font-mono tabular-nums font-bold text-[#991B1B] dark:text-rose-400';
             } else if (isNegative) {
-              textClass = 'font-mono tabular-nums text-emerald-700';
+              textClass = 'font-mono tabular-nums text-emerald-700 dark:text-emerald-400';
             } else if (isEmpty) {
-              textClass = 'font-mono text-slate-300';
+              textClass = 'font-mono text-slate-300 dark:text-slate-600';
             } else if (col.type !== 'text') {
-              textClass = 'font-mono tabular-nums text-slate-800';
+              textClass = 'font-mono tabular-nums text-slate-800 dark:text-slate-200';
             }
 
-            const stickyClass = isSticky ? `sticky z-10 ${rowBg} group-hover:bg-[#EDF4FF]` :
-                                isSortedCol ? 'bg-[#1B365D]/[0.03] group-hover:bg-[#EDF4FF]' : '';
+            const stickyClass = isSticky ? `sticky z-10 ${rowBg} group-hover:bg-[#EDF4FF] dark:group-hover:bg-[#1E293B]` :
+                                isSortedCol ? 'bg-[#1B365D]/[0.03] dark:bg-sky-500/[0.05] group-hover:bg-[#EDF4FF] dark:group-hover:bg-[#1E293B]' : '';
 
             let titleAttr = '';
             if (col.key === 'name' && stock.category) {
@@ -846,10 +877,10 @@
 
             html += `
               <td ${titleAttr} style="${isSticky ? `left: ${col.stickyLeft}px;` : ''}"
-                  class="h-[38px] px-2.5 border-b border-slate-200/80 whitespace-nowrap transition-colors duration-100 ${col.minWidth}
+                  class="h-[38px] px-2.5 border-b border-slate-200/80 dark:border-slate-800 whitespace-nowrap transition-colors duration-100 ${col.minWidth}
                          ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
                          ${stickyClass}
-                         ${isLastSticky ? 'border-r border-slate-300 shadow-[3px_0_6px_-3px_rgba(15,23,42,0.12)]' : 'border-r border-slate-100'}
+                         ${isLastSticky ? 'border-r border-slate-300 dark:border-slate-700 shadow-[3px_0_6px_-3px_rgba(15,23,42,0.12)]' : 'border-r border-slate-100 dark:border-slate-800/60'}
                          ${textClass}">
                 ${formatted}
               </td>
@@ -952,7 +983,7 @@
         document.querySelectorAll('.market-pill').forEach(btn => {
           const isAct = btn.getAttribute('data-market') === activeMarket;
           btn.className = `market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-            isAct ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            isAct ? 'bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
           }`;
         });
       }
@@ -973,7 +1004,7 @@
         document.querySelectorAll('.asset-pill').forEach(btn => {
           const isAct = btn.getAttribute('data-asset') === activeAsset;
           btn.className = `asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-            isAct ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            isAct ? 'bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
           }`;
         });
       }
@@ -1078,12 +1109,12 @@
           const id = btn.getAttribute('data-preset');
           if (id === 'quality-dividend') {
             btn.className = id === activeId
-              ? 'preset-pill px-3 py-1 text-xs font-bold text-blue-900 bg-blue-200/90 border-2 border-blue-700 rounded whitespace-nowrap shrink-0 shadow-xs transition-colors cursor-pointer'
-              : 'preset-pill px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border-2 border-blue-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer';
+              ? 'preset-pill px-3 py-1 text-xs font-bold text-blue-900 dark:text-blue-200 bg-blue-200/90 dark:bg-blue-900/60 border-2 border-blue-700 dark:border-blue-400 rounded whitespace-nowrap shrink-0 shadow-xs transition-colors cursor-pointer'
+              : 'preset-pill px-3 py-1 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-2 border-blue-500 dark:border-blue-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer';
           } else if (id === activeId) {
-            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs';
+            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white dark:bg-slate-700 text-[#1B365D] dark:text-white shadow-xs';
           } else {
-            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900';
+            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white';
           }
         });
       }
@@ -1227,6 +1258,40 @@
 
       document.getElementById('open-guide-btn').addEventListener('click', () => {
         alert('【全台股資料來源與更新說明】\n\n1. 資料涵蓋臺灣證券交易所 (上市)、櫃買中心 (上櫃) 及 ETF 共約 2,300+ 檔完整資料。\n2. 雙擊目錄下的「每週更新資料.bat」即可自動從官方 API 批量抓取並同步更新 stocks.json 與 stocks_data.js。\n3. 亦可點擊右上角「載入 JSON」直接匯入本機檔案檢視。');
+      });
+
+      // Theme Toggle Logic
+      const themeToggleBtn = document.getElementById('theme-toggle-btn');
+      const sunIcon = document.getElementById('theme-icon-sun');
+      const moonIcon = document.getElementById('theme-icon-moon');
+
+      function updateThemeIcons(isDark) {
+        if (!sunIcon || !moonIcon) return;
+        if (isDark) {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+          themeToggleBtn?.setAttribute('aria-label', '切換為淺色模式');
+          themeToggleBtn?.setAttribute('title', '切換為淺色模式');
+        } else {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+          themeToggleBtn?.setAttribute('aria-label', '切換為深色模式');
+          themeToggleBtn?.setAttribute('title', '切換為深色模式');
+        }
+      }
+
+      // Initialize theme icons
+      updateThemeIcons(document.documentElement.classList.contains('dark'));
+
+      themeToggleBtn?.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        try {
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        } catch (e) {
+          console.warn('Unable to persist theme to localStorage', e);
+        }
+        updateThemeIcons(isDark);
+        render(); // re-render to ensure any style-dependent classes re-evaluate smoothly
       });
 
       // Start
