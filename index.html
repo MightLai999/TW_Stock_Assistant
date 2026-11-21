@@ -877,7 +877,7 @@
         let html = '';
         rows.forEach((stock, rIdx) => {
           const isEven = rIdx % 2 === 0;
-          const rowBg = isEven ? 'bg-white dark:bg-[#111827]' : 'bg-[#F8FAFC] dark:bg-[#0F172A]/70';
+          const rowBg = isEven ? 'bg-white dark:bg-[#111827]' : 'bg-[#F8FAFC] dark:bg-[#0F172A]';
 
           html += `<tr class="group ${rowBg} hover:bg-[#EDF4FF] dark:hover:bg-[#1E293B] transition-colors duration-100">`;
           COLUMNS.forEach((col, cIdx) => {
