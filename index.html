@@ -1,0 +1,1236 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>台股殖利率小幫手2026 — 全台股高殖利率與股利資料大表</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', '"Noto Sans TC"', '"Microsoft JhengHei"', 'system-ui', 'sans-serif'],
+              mono: ['"IBM Plex Mono"', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],
+            },
+            colors: {
+              brand: {
+                navy: '#1B365D',
+                dark: '#132847',
+                accent: '#991B1B'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      }
+      .table-scroll::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      .table-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .table-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border: 2px solid #f1f5f9;
+        border-radius: 6px;
+      }
+      .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F5F7FA] text-slate-900 antialiased min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-[1720px] mx-auto px-4 lg:px-6 min-h-14 py-1.5 flex items-center justify-between gap-4 lg:gap-8">
+        <div class="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 min-w-0">
+          <a href="#" id="brand-link" class="text-[17px] font-bold tracking-tight text-[#1B365D] whitespace-nowrap shrink-0">
+            台股殖利率小幫手2026
+          </a>
+          <span id="brand-credit" class="text-[11px] font-normal text-slate-400 tracking-normal whitespace-pre">Author: Might.LAI  Development Tools: Google Antigravity</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-[13px] font-medium text-slate-600" id="preset-nav">
+          <button type="button" data-preset="all" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium text-[#1B365D] whitespace-nowrap shrink-0">殖利率總表</button>
+          <button type="button" data-preset="high-yield-5" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">高息 5%+</button>
+          <button type="button" data-preset="steady-10y" class="preset-btn hover:text-[#1B365D] transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0">10年存股</button>
+          <button type="button" id="open-guide-btn" class="hover:text-[#1B365D] transition-colors cursor-pointer whitespace-nowrap shrink-0">資料格式與更新</button>
+        </nav>
+        <div class="flex items-center shrink-0">
+          <button type="button" id="upload-json-btn" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <span>載入 JSON</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-[1720px] w-full mx-auto px-4 lg:px-6 py-4 flex flex-col gap-3">
+      <!-- Data Freshness & Price Date Bar -->
+      <div id="data-freshness-bar" class="bg-slate-50/90 border border-slate-200 border-l-4 border-l-[#1B365D] rounded-lg px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span class="inline-flex items-center gap-1.5 text-slate-700">
+            <svg class="w-3.5 h-3.5 text-[#1B365D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="font-semibold text-[#1B365D]">資料更新日期：</span>
+            <strong id="meta-updated-date" class="font-mono tabular-nums font-bold text-slate-900">讀取中...</strong>
+          </span>
+          <span class="text-slate-300" aria-hidden="true">·</span>
+          <span class="text-slate-700">
+            <span class="font-semibold text-[#1B365D]">收盤股價日期：</span>
+            <strong id="meta-price-date" class="font-mono tabular-nums font-bold text-slate-900">-</strong>
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-500">
+          <span>財報基準：<span id="meta-eps-period" class="font-mono tabular-nums text-slate-700 font-medium">-</span></span>
+          <span class="text-slate-300" aria-hidden="true">·</span>
+          <span id="meta-universe-desc">上市 / 上櫃全市場</span>
+        </div>
+      </div>
+
+      <!-- Filter Panel -->
+      <section class="bg-white border border-slate-200 rounded-lg px-4 py-3.5">
+        <form id="filter-form" class="space-y-3">
+          <!-- Keyword + Market / Asset Type + Quick Presets -->
+          <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
+            <div class="flex flex-wrap items-center gap-2.5 flex-1">
+              <div class="relative flex-1 min-w-[230px] max-w-md">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" id="keyword-input" placeholder="搜尋代號、名稱、市場或產業（例：2330、半導體、上櫃）" class="w-full h-9 pl-9 pr-8 text-sm bg-slate-50 border border-slate-300 rounded-md text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D] transition-colors" />
+                <button type="button" id="clear-kw-btn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 items-center justify-center text-slate-400 hover:text-slate-700 text-xs font-semibold rounded">×</button>
+              </div>
+
+              <!-- Market Filter Segmented Control -->
+              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-md shrink-0" role="group" aria-label="市場別篩選">
+                <button type="button" data-market="all" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部市場</button>
+                <button type="button" data-market="上市" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">上市</button>
+                <button type="button" data-market="上櫃" class="market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">上櫃</button>
+              </div>
+
+              <!-- Asset Type Segmented Control -->
+              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-md shrink-0" role="group" aria-label="標的類型篩選">
+                <button type="button" data-asset="all" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部標的</button>
+                <button type="button" data-asset="stock" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">僅個股</button>
+                <button type="button" data-asset="etf" class="asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">僅 ETF</button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 overflow-x-auto bg-slate-100 p-1 rounded-md shrink-0" id="filter-presets-bar">
+              <button type="button" data-preset="all" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs">全部</button>
+              <button type="button" id="preset-quality-dividend" data-preset="quality-dividend" title="條件：去年與今年Q1~Q3 EPS皆>0、業績進度(X)>0.75、今年配息率<=100%、明年預期殖利率(B)>=5%" class="preset-pill px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border-2 border-blue-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer">配息優股</button>
+              <button type="button" data-preset="high-yield-5" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">現金殖利率 5%+</button>
+              <button type="button" data-preset="growth-yield" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">業績成長＋預期高息 (X≥0.75, B≥5%)</button>
+              <button type="button" data-preset="steady-10y" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">10年連續配息＋4%+</button>
+              <button type="button" data-preset="value-pe" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">價值股 (PE ≤ 17)</button>
+              <button type="button" data-preset="july-ex" class="preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900">7月除息股</button>
+            </div>
+          </div>
+
+          <!-- 12 Filters -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-12 gap-2.5 pt-2.5 border-t border-slate-100">
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>現金殖利率</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-minCashYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>合計殖利率</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-minTotalYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>配息率下限</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-minPayoutRatio" placeholder="例 50" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>配息率上限</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-maxPayoutRatio" placeholder="例 100" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>10年股利次數</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="1" min="0" id="filter-minDivCount10Y" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">次</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>10年平均股利</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-minAvgDiv10Y" placeholder="例 1.5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">元</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>本益比</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.5" min="0" id="filter-maxPeRatio" placeholder="例 18" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>股價淨值比</span><span class="font-mono text-[11px] text-slate-400">&lt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-maxPbRatio" placeholder="例 2" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>董監持股</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.5" min="0" id="filter-minInsiderHolding" placeholder="例 10" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>業績進度(X)</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.05" min="0" id="filter-minEpsProgress" placeholder="例 0.75" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">倍</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>預期殖利率(B)</span><span class="font-mono text-[11px] text-slate-400">&gt;=</span>
+              </span>
+              <div class="relative flex items-center">
+                <input type="number" step="0.1" min="0" id="filter-minExpectedYield" placeholder="例 5" class="w-full h-8 pl-2.5 pr-7 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D]" />
+                <span class="absolute right-2 text-[11px] text-slate-400 select-none">%</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="flex items-center justify-between text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                <span>除息月份</span><span class="text-[11px] text-slate-400">月</span>
+              </span>
+              <select id="filter-exDividendMonth" class="w-full h-8 px-2 text-xs bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1B365D]/20 focus:border-[#1B365D] cursor-pointer">
+                <option value="">全部月份</option>
+                <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+                <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+                <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+                <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+              </select>
+            </label>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-xs text-slate-500" id="filter-status-desc">
+              <span>尚未設定數值或月份篩選條件</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="submit" class="inline-flex items-center gap-1.5 h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                <span>套用篩選</span>
+              </button>
+              <button type="button" id="reset-filters-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span>清除條件</span>
+              </button>
+              <button type="button" id="export-csv-btn" class="inline-flex items-center gap-1.5 h-9 px-3.5 text-xs font-medium text-slate-800 bg-slate-100 border border-slate-300 hover:bg-slate-200/80 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>匯出目前結果為 CSV</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Summary strip -->
+      <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-600">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1" id="summary-left">
+          <span>篩選結果：<strong class="font-mono tabular-nums text-slate-900" id="stat-count">0</strong> / <span class="font-mono tabular-nums" id="stat-total">0</span> 檔（上市 <span class="font-mono tabular-nums" id="stat-listed">0</span> · 上櫃 <span class="font-mono tabular-nums" id="stat-otc">0</span>）</span>
+          <span class="text-slate-300">·</span>
+          <span>平均現金殖利率 <strong class="font-mono tabular-nums text-slate-900" id="stat-avg-yield">0.00%</strong></span>
+          <span class="text-slate-300">·</span>
+          <span>現金殖利率 &gt; 5% 共 <strong class="font-mono tabular-nums text-[#991B1B]" id="stat-over5">0</strong> 檔（深紅字凸顯）</span>
+          <span class="text-slate-300">·</span>
+          <span>排序：<span id="stat-sort">現金殖利率（降冪 ▼）</span></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-slate-500">
+          <span id="data-source-tag">資料來源：載入中...</span>
+          <span class="text-slate-300">·</span>
+          <span>共 29 欄（左側市場、代號與公司固定）</span>
+        </div>
+      </div>
+
+      <!-- Main 29-Column Table -->
+      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+        <div id="table-scroll-container" class="table-scroll overflow-auto max-h-[calc(100vh-380px)] min-h-[380px]">
+          <table class="w-max min-w-full border-separate border-spacing-0 text-[13px]" id="stocks-table">
+            <thead id="table-head">
+              <!-- Rendered via JS -->
+            </thead>
+            <tbody id="table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="border-t border-slate-200 bg-slate-50/70 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+          <div class="flex flex-wrap items-center gap-3">
+            <span id="page-range-info" class="font-mono tabular-nums">顯示第 0–0 筆，共 0 筆</span>
+            <label class="inline-flex items-center gap-1.5">
+              <span>每頁筆數</span>
+              <select id="page-size-select" class="h-7 px-2 text-xs bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-[#1B365D] cursor-pointer">
+                <option value="50">50 筆</option>
+                <option value="100" selected>100 筆</option>
+                <option value="200">200 筆</option>
+                <option value="500">500 筆</option>
+                <option value="0">全部顯示</option>
+              </select>
+            </label>
+          </div>
+          <div class="flex items-center gap-1.5" id="pagination-controls">
+            <button type="button" id="page-first-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">第一頁</button>
+            <button type="button" id="page-prev-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">上一頁</button>
+            <span id="page-indicator" class="px-2 font-mono tabular-nums text-slate-800 whitespace-nowrap">第 1 / 1 頁</span>
+            <button type="button" id="page-next-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">下一頁</button>
+            <button type="button" id="page-last-btn" class="h-7 px-2.5 text-xs bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer">最後一頁</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-[1720px] w-full mx-auto px-4 lg:px-6 py-3 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2">
+      <span>資料來源：臺灣證券交易所 (TWSE)、櫃買中心 (TPEx) 與公開資訊觀測站 (MOPS)，雙擊「每週更新資料.bat」即可同步全台股最新資料。</span>
+      <span>點擊任一欄位標題皆可切換升冪 / 降冪排序</span>
+    </footer>
+
+    <!-- Hidden File Input for JSON -->
+    <input type="file" id="json-file-input" accept=".json,application/json" class="hidden" />
+
+    <!-- Direct file:// support bundle generated by fetch_stocks.py -->
+    <script src="stocks_data.js"></script>
+
+    <!-- Core Stocks Data & Vanilla JS Engine -->
+    <script>
+      // 內建備援 stocksData（若外部 stocks.json 與 stocks_data.js 尚未載入時使用）
+      const initialStocksData = [
+        {
+          market: '上市', code: '2330', name: '台積電', category: '半導體業', isEtf: false, cashDividend: 19.0, exDividendDate: '2026/09/16',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 2100.0, cashYield: 0.9, realYield: 0.87, preExPrice: 2385.0, totalYield: 0.9,
+          payDate: '2026/10/08', payoutRatio: 28.67, insiderHolding: 6.5, avgDiv3Y: 17.67, avgDiv6Y: 14.33,
+          avgDiv10Y: 12.35, divCount10Y: 10, epsQ1: 22.08, epsQ2: 27.25, epsQ3: 29.42, epsYTD: 78.75,
+          epsLastYear: 66.26, epsQuarters: 3, epsProgressRatio: 1.19, expectedDividend: 30.11, expectedYield: 1.43, peRatio: 21.37, pbRatio: 7.78
+        },
+        {
+          market: '上市', code: '2317', name: '鴻海', category: '其他電子業', isEtf: false, cashDividend: 7.17, exDividendDate: '2026/07/02',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 220.5, cashYield: 3.25, realYield: null, preExPrice: null, totalYield: 3.25,
+          payDate: '2026/07/31', payoutRatio: 52.72, insiderHolding: 12.39, avgDiv3Y: 6.12, avgDiv6Y: 5.48,
+          avgDiv10Y: 4.76, divCount10Y: 10, epsQ1: 3.56, epsQ2: 4.27, epsQ3: 5.51, epsYTD: 13.34,
+          epsLastYear: 13.6, epsQuarters: 3, epsProgressRatio: 0.98, expectedDividend: 9.38, expectedYield: 4.25, peRatio: 13.34, pbRatio: 1.57
+        },
+        {
+          market: '上市', code: '2454', name: '聯發科', category: '半導體業', isEtf: false, cashDividend: 53.5, exDividendDate: '2026/07/07',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 3720.0, cashYield: 1.44, realYield: 2.5, preExPrice: 4125.0, totalYield: 1.44,
+          payDate: '2026/07/31', payoutRatio: 80.86, insiderHolding: 2.73, avgDiv3Y: 54.17, avgDiv6Y: 58.09,
+          avgDiv10Y: 38.75, divCount10Y: 10, epsQ1: 15.17, epsQ2: 15.27, epsQ3: 17.5, epsYTD: 47.94,
+          epsLastYear: 66.16, epsQuarters: 3, epsProgressRatio: 0.72, expectedDividend: 51.69, expectedYield: 1.39, peRatio: 59.84, pbRatio: 12.77
+        },
+        {
+          market: '上市', code: '3034', name: '聯詠', category: '半導體業', isEtf: false, cashDividend: 23.0, exDividendDate: '2026/07/10',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 436.5, cashYield: 5.27, realYield: 4.24, preExPrice: 542.0, totalYield: 5.27,
+          payDate: '2026/08/11', payoutRatio: 85.6, insiderHolding: 1.77, avgDiv3Y: 27.67, avgDiv6Y: 31.18,
+          avgDiv10Y: 21.9, divCount10Y: 10, epsQ1: 6.19, epsQ2: 10.4, epsQ3: 9.99, epsYTD: 26.58,
+          epsLastYear: 26.87, epsQuarters: 3, epsProgressRatio: 0.99, expectedDividend: 30.34, expectedYield: 6.95, peRatio: 14.04, pbRatio: 3.85
+        },
+        {
+          market: '上市', code: '2886', name: '兆豐金', category: '金融保險業', isEtf: false, cashDividend: 1.75, exDividendDate: '2026/08/13',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 53.4, cashYield: 3.28, realYield: 3.59, preExPrice: 48.7, totalYield: 3.28,
+          payDate: '2026/09/04', payoutRatio: 74.15, insiderHolding: 20.61, avgDiv3Y: 1.72, avgDiv6Y: 1.62,
+          avgDiv10Y: 1.6, divCount10Y: 10, epsQ1: 0.63, epsQ2: 0.81, epsQ3: 0.77, epsYTD: 2.21,
+          epsLastYear: 2.36, epsQuarters: 3, epsProgressRatio: 0.94, expectedDividend: 2.19, expectedYield: 4.1, peRatio: 20.0, pbRatio: 1.94
+        },
+        {
+          market: '上市', code: '2891', name: '中信金', category: '金融保險業', isEtf: false, cashDividend: 2.5, exDividendDate: '2026/07/10',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 74.0, cashYield: 3.38, realYield: null, preExPrice: null, totalYield: 3.38,
+          payDate: '2026/08/07', payoutRatio: 61.27, insiderHolding: 1.44, avgDiv3Y: 2.2, avgDiv6Y: 1.68,
+          avgDiv10Y: 1.42, divCount10Y: 10, epsQ1: 1.18, epsQ2: 0.78, epsQ3: 1.22, epsYTD: 3.18,
+          epsLastYear: 4.08, epsQuarters: 3, epsProgressRatio: 0.78, expectedDividend: 2.6, expectedYield: 3.51, peRatio: 18.14, pbRatio: 2.15
+        },
+        {
+          market: '上市', code: '2884', name: '玉山金', category: '金融保險業', isEtf: false, cashDividend: 1.4, exDividendDate: '2026/07/01',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 42.5, cashYield: 3.29, realYield: 4.06, preExPrice: 34.45, totalYield: 3.29,
+          payDate: '2026/07/27', payoutRatio: 66.04, insiderHolding: 1.42, avgDiv3Y: 1.33, avgDiv6Y: 1.22,
+          avgDiv10Y: 1.28, divCount10Y: 10, epsQ1: 0.62, epsQ2: 0.7, epsQ3: 0.67, epsYTD: 1.99,
+          epsLastYear: 2.12, epsQuarters: 3, epsProgressRatio: 0.94, expectedDividend: 1.75, expectedYield: 4.12, peRatio: 17.1, pbRatio: 2.74
+        },
+        {
+          market: '上市', code: '2412', name: '中華電', category: '通信網路業', isEtf: false, cashDividend: 5.2, exDividendDate: '2026/07/09',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 164.5, cashYield: 3.16, realYield: null, preExPrice: null, totalYield: 3.16,
+          payDate: '2026/08/07', payoutRatio: 104.21, insiderHolding: 35.29, avgDiv3Y: 4.99, avgDiv6Y: 4.76,
+          avgDiv10Y: 4.72, divCount10Y: 10, epsQ1: 1.3, epsQ2: 1.37, epsQ3: 1.58, epsYTD: 4.25,
+          epsLastYear: 4.99, epsQuarters: 3, epsProgressRatio: 0.85, expectedDividend: 5.9, expectedYield: 3.59, peRatio: 30.46, pbRatio: 3.38
+        },
+        {
+          market: '上市', code: '1216', name: '統一', category: '食品工業', isEtf: false, cashDividend: 3.0, exDividendDate: '2026/07/30',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 78.5, cashYield: 3.82, realYield: null, preExPrice: null, totalYield: 3.82,
+          payDate: '2026/09/04', payoutRatio: 86.96, insiderHolding: 9.85, avgDiv3Y: 3.0, avgDiv6Y: 2.88,
+          avgDiv10Y: 2.95, divCount10Y: 10, epsQ1: 1.15, epsQ2: 1.41, epsQ3: 1.14, epsYTD: 3.7,
+          epsLastYear: 3.45, epsQuarters: 3, epsProgressRatio: 1.07, expectedDividend: 4.29, expectedYield: 5.46, peRatio: 18.65, pbRatio: 3.08
+        },
+        {
+          market: '上市', code: '2603', name: '長榮', category: '航運業', isEtf: false, cashDividend: 16.0, exDividendDate: '2026/06/17',
+          stockDividend: 0.0, capReserveStockDiv: 0.0, exRightsDate: '-', price: 252.0, cashYield: 6.35, realYield: null, preExPrice: null, totalYield: 6.35,
+          payDate: '2026/07/17', payoutRatio: 50.51, insiderHolding: 2.75, avgDiv3Y: 19.5, avgDiv6Y: 24.83,
+          avgDiv10Y: 15.1, divCount10Y: 7, epsQ1: 3.84, epsQ2: 7.41, epsQ3: 21.53, epsYTD: 32.77,
+          epsLastYear: 31.68, epsQuarters: 3, epsProgressRatio: 1.03, expectedDividend: 22.07, expectedYield: 8.76, peRatio: 6.92, pbRatio: 0.9
+        },
+        {
+          market: '上市', code: '0056', name: '元大高股息', category: 'ETF', isEtf: true, cashDividend: 4.94, exDividendDate: '2026/10/22',
+          stockDividend: 0.0, capReserveStockDiv: null, exRightsDate: '-', price: 47.41, cashYield: 10.42, realYield: 10.24, preExPrice: 58.75, totalYield: 10.42,
+          payDate: '-', payoutRatio: null, insiderHolding: null, avgDiv3Y: 4.15, avgDiv6Y: 3.09,
+          avgDiv10Y: 2.43, divCount10Y: 10, epsQ1: null, epsQ2: null, epsQ3: null, epsYTD: null,
+          epsLastYear: null, epsQuarters: null, epsProgressRatio: null, expectedDividend: null, expectedYield: null, peRatio: null, pbRatio: null
+        },
+        {
+          market: '上市', code: '00878', name: '國泰永續高股息', category: 'ETF', isEtf: true, cashDividend: 3.34, exDividendDate: '2026/11/17',
+          stockDividend: 0.0, capReserveStockDiv: null, exRightsDate: '-', price: 29.78, cashYield: 11.22, realYield: null, preExPrice: null, totalYield: 11.22,
+          payDate: '-', payoutRatio: null, insiderHolding: null, avgDiv3Y: 2.37, avgDiv6Y: 1.75,
+          avgDiv10Y: 1.06, divCount10Y: 7, epsQ1: null, epsQ2: null, epsQ3: null, epsYTD: null,
+          epsLastYear: null, epsQuarters: null, epsProgressRatio: null, expectedDividend: null, expectedYield: null, peRatio: null, pbRatio: null
+        }
+      ];
+
+      // 嚴格按照 29 個欄位順序定義（第 1 欄為「市場」）
+      const COLUMNS = [
+        { key: 'market', label: '市場', type: 'market', align: 'center', minWidth: 'w-[58px] min-w-[58px]', stickyLeft: 0 },
+        { key: 'code', label: '代號', type: 'code', align: 'left', minWidth: 'w-[74px] min-w-[74px]', stickyLeft: 58 },
+        { key: 'name', label: '公司', type: 'text', align: 'left', minWidth: 'w-[126px] min-w-[126px]', stickyLeft: 132 },
+        { key: 'cashDividend', label: '配息', type: 'number', align: 'right', minWidth: 'min-w-[74px]', decimals: 2 },
+        { key: 'exDividendDate', label: '除息日', type: 'date', align: 'center', minWidth: 'min-w-[96px]' },
+        { key: 'stockDividend', label: '配股', type: 'number', align: 'right', minWidth: 'min-w-[74px]', decimals: 2 },
+        { key: 'capReserveStockDiv', label: '公積配股', type: 'number', align: 'right', minWidth: 'min-w-[84px]', decimals: 2 },
+        { key: 'exRightsDate', label: '除權日', type: 'date', align: 'center', minWidth: 'min-w-[96px]' },
+        { key: 'price', label: '股價', type: 'number', align: 'right', minWidth: 'min-w-[84px]', decimals: 2 },
+        { key: 'cashYield', label: '現金殖利率', type: 'percent', align: 'right', minWidth: 'min-w-[104px]', decimals: 2, isCashYield: true, isHighYieldCol: true },
+        { key: 'realYield', label: '真實殖利率', type: 'percent', align: 'right', minWidth: 'min-w-[98px]', decimals: 2, isHighYieldCol: true },
+        { key: 'totalYield', label: '殖利率', type: 'percent', align: 'right', minWidth: 'min-w-[88px]', decimals: 2 },
+        { key: 'payDate', label: '發息日', type: 'date', align: 'center', minWidth: 'min-w-[96px]' },
+        { key: 'payoutRatio', label: '配息率', type: 'percent', align: 'right', minWidth: 'min-w-[88px]', decimals: 2 },
+        { key: 'insiderHolding', label: '董監持股', type: 'percent', align: 'right', minWidth: 'min-w-[94px]', decimals: 2 },
+        { key: 'avgDiv3Y', label: '3年平均股利', type: 'number', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 },
+        { key: 'avgDiv6Y', label: '6年平均股利', type: 'number', align: 'right', minWidth: 'min-w-[104px]', decimals: 2 },
+        { key: 'avgDiv10Y', label: '10年平均股利', type: 'number', align: 'right', minWidth: 'min-w-[110px]', decimals: 2 },
+        { key: 'divCount10Y', label: '10年股利次數', type: 'integer', align: 'right', minWidth: 'min-w-[110px]' },
+        { key: 'epsQ1', label: '1QEPS', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
+        { key: 'epsQ2', label: '2QEPS', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
+        { key: 'epsQ3', label: '3QEPS', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
+        { key: 'epsYTD', label: '今年累積EPS', type: 'number', align: 'right', minWidth: 'min-w-[108px]', decimals: 2 },
+        { key: 'epsLastYear', label: '去年EPS', type: 'number', align: 'right', minWidth: 'min-w-[88px]', decimals: 2 },
+        { key: 'epsProgressRatio', label: '業績進度(X)', type: 'number', align: 'right', minWidth: 'min-w-[100px]', decimals: 2 },
+        { key: 'expectedDividend', label: '明年預期配息(A)', type: 'number', align: 'right', minWidth: 'min-w-[116px]', decimals: 2 },
+        { key: 'expectedYield', label: '明年預期殖利率(B)', type: 'percent', align: 'right', minWidth: 'min-w-[128px]', decimals: 2, isHighYieldCol: true },
+        { key: 'peRatio', label: '本益比', type: 'number', align: 'right', minWidth: 'min-w-[82px]', decimals: 2 },
+        { key: 'pbRatio', label: '股價淨值比', type: 'number', align: 'right', minWidth: 'min-w-[102px]', decimals: 2 }
+      ];
+
+      let allStocks = [...initialStocksData];
+      let sortKey = 'cashYield';
+      let sortDirection = 'desc';
+      let currentPage = 1;
+      let pageSize = 100;
+      let lastFilteredRows = [];
+
+      let filters = {
+        keyword: '',
+        market: 'all',
+        assetType: 'all',
+        qualityDividendOnly: false,
+        minCashYield: '',
+        minTotalYield: '',
+        minPayoutRatio: '',
+        maxPayoutRatio: '',
+        minDivCount10Y: '',
+        minAvgDiv10Y: '',
+        maxPeRatio: '',
+        maxPbRatio: '',
+        minInsiderHolding: '',
+        minEpsProgress: '',
+        minExpectedYield: '',
+        exDividendMonth: ''
+      };
+
+      function normalizeRecords(arr) {
+        return arr.map(item => ({
+          ...item,
+          market: item.market || '上市'
+        }));
+      }
+
+      function formatDateWithWeekday(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return '-';
+        const s = dateStr.trim();
+        if (!s || s === '-') return '-';
+        const m = s.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?:\s+(.*))?$/);
+        if (!m) return s;
+        const y = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        const d = parseInt(m[3], 10);
+        const dt = new Date(y, mo - 1, d);
+        if (Number.isNaN(dt.getTime())) return s;
+        const wd = ['日', '一', '二', '三', '四', '五', '六'][dt.getDay()];
+        const pad2 = n => String(n).padStart(2, '0');
+        const datePart = `${y}/${pad2(mo)}/${pad2(d)} (${wd})`;
+        return m[4] ? `${datePart} ${m[4]}` : datePart;
+      }
+
+      function renderMetaBar(meta) {
+        const updatedEl = document.getElementById('meta-updated-date');
+        const priceEl = document.getElementById('meta-price-date');
+        const epsEl = document.getElementById('meta-eps-period');
+        const univEl = document.getElementById('meta-universe-desc');
+        if (!updatedEl || !priceEl || !epsEl || !univEl) return;
+
+        if (!meta) {
+          updatedEl.textContent = '內建備援資料';
+          priceEl.textContent = '-';
+          epsEl.textContent = '-';
+          univEl.textContent = `共 ${allStocks.length} 檔`;
+          return;
+        }
+
+        updatedEl.textContent = formatDateWithWeekday(meta.updatedAt || meta.updatedDate || '');
+        const priceFormatted = formatDateWithWeekday(meta.priceDate || '');
+        const hasDistinctDates =
+          meta.twsePriceDate &&
+          meta.tpexPriceDate &&
+          meta.twsePriceDate !== '-' &&
+          meta.tpexPriceDate !== '-' &&
+          meta.twsePriceDate !== meta.tpexPriceDate;
+        priceEl.textContent = hasDistinctDates
+          ? `${priceFormatted}（上市 ${meta.twsePriceDate} · 上櫃 ${meta.tpexPriceDate}）`
+          : priceFormatted;
+        epsEl.textContent = meta.epsPeriod || '-';
+        if (meta.listedCount != null && meta.otcCount != null && meta.total != null) {
+          univEl.textContent = `上市 ${meta.listedCount} · 上櫃 ${meta.otcCount}（合計 ${meta.total} 檔）`;
+        } else {
+          univEl.textContent = `共 ${allStocks.length} 檔`;
+        }
+      }
+
+      // 優先讀取 stocks.json / public/stocks.json；若處於 file:// 環境或資料較少則載入 stocks_data.js
+      async function tryLoadJson() {
+        let loadedFromFetch = false;
+        const jsBundle = Array.isArray(window.__TW_STOCKS_DATA__) && window.__TW_STOCKS_DATA__.length > 0
+          ? window.__TW_STOCKS_DATA__
+          : null;
+        const jsMeta = window.__TW_STOCKS_META__ || null;
+        let activeMeta = jsMeta;
+
+        const sources = [
+          { dataUrl: 'stocks.json', metaUrl: 'stocks_meta.json' },
+          { dataUrl: 'public/stocks.json', metaUrl: 'public/stocks_meta.json' },
+          { dataUrl: '/stocks.json', metaUrl: '/stocks_meta.json' }
+        ];
+        if (window.location.protocol !== 'file:' || !jsBundle) {
+          for (const src of sources) {
+            try {
+              const res = await fetch(src.dataUrl, { cache: 'no-store' });
+              if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                  if (jsBundle && data.length < jsBundle.length) {
+                    break;
+                  }
+                  allStocks = normalizeRecords(data);
+                  try {
+                    const metaRes = await fetch(src.metaUrl, { cache: 'no-store' });
+                    if (metaRes.ok) {
+                      const fetchedMeta = await metaRes.json();
+                      if (fetchedMeta && typeof fetchedMeta === 'object') {
+                        activeMeta = fetchedMeta;
+                      }
+                    }
+                  } catch (metaErr) {
+                    // Ignore meta fetch errors and keep jsMeta fallback
+                  }
+                  const updatedText = activeMeta?.updatedAt ? ` · 更新於 ${activeMeta.updatedAt}` : '';
+                  document.getElementById('data-source-tag').textContent = `資料來源：${src.dataUrl} (${allStocks.length} 檔${updatedText})`;
+                  loadedFromFetch = true;
+                  break;
+                }
+              }
+            } catch (e) {
+              // file:// 環境下 fetch 會被瀏覽器擋下，自動改用 stocks_data.js
+            }
+          }
+        }
+
+        if (!loadedFromFetch) {
+          if (jsBundle) {
+            allStocks = normalizeRecords(jsBundle);
+            activeMeta = jsMeta;
+            const updatedText = activeMeta?.updatedAt ? ` · 更新於 ${activeMeta.updatedAt}` : '';
+            document.getElementById('data-source-tag').textContent = `資料來源：stocks_data.js (${allStocks.length} 檔${updatedText})`;
+          } else {
+            allStocks = normalizeRecords(initialStocksData);
+            activeMeta = null;
+            document.getElementById('data-source-tag').textContent = `資料來源：內建備援資料 (${allStocks.length} 檔)`;
+          }
+        }
+
+        renderMetaBar(activeMeta);
+        render();
+      }
+
+      function formatValue(record, col) {
+        const val = record[col.key];
+        if (val === null || val === undefined || val === '') return '-';
+        if (col.type === 'market' || col.type === 'code' || col.type === 'text' || col.type === 'date') return String(val);
+        const num = Number(val);
+        if (isNaN(num)) return '-';
+        if (col.type === 'integer') return String(Math.round(num));
+        if (col.type === 'percent') return num.toFixed(col.decimals ?? 2) + '%';
+        return num.toFixed(col.decimals ?? 2);
+      }
+
+      function getFilteredAndSorted() {
+        const kw = filters.keyword.trim().toLowerCase();
+        const minCash = filters.minCashYield !== '' ? parseFloat(filters.minCashYield) : null;
+        const minTotal = filters.minTotalYield !== '' ? parseFloat(filters.minTotalYield) : null;
+        const minPayout = filters.minPayoutRatio !== '' ? parseFloat(filters.minPayoutRatio) : null;
+        const maxPayout = filters.maxPayoutRatio !== '' ? parseFloat(filters.maxPayoutRatio) : null;
+        const minDivCount = filters.minDivCount10Y !== '' ? parseInt(filters.minDivCount10Y, 10) : null;
+        const minAvgDiv = filters.minAvgDiv10Y !== '' ? parseFloat(filters.minAvgDiv10Y) : null;
+        const maxPe = filters.maxPeRatio !== '' ? parseFloat(filters.maxPeRatio) : null;
+        const maxPb = filters.maxPbRatio !== '' ? parseFloat(filters.maxPbRatio) : null;
+        const minInsider = filters.minInsiderHolding !== '' ? parseFloat(filters.minInsiderHolding) : null;
+        const minEpsProgress = filters.minEpsProgress !== '' ? parseFloat(filters.minEpsProgress) : null;
+        const minExpectedYield = filters.minExpectedYield !== '' ? parseFloat(filters.minExpectedYield) : null;
+        const exMonth = filters.exDividendMonth !== '' ? parseInt(filters.exDividendMonth, 10) : null;
+
+        const filtered = allStocks.filter(s => {
+          if (filters.market !== 'all' && s.market !== filters.market) return false;
+          if (filters.assetType !== 'all') {
+            const isEtf = s.isEtf === true || String(s.code).startsWith('00');
+            if (filters.assetType === 'etf' && !isEtf) return false;
+            if (filters.assetType === 'stock' && isEtf) return false;
+          }
+          if (filters.qualityDividendOnly) {
+            const positiveEps =
+              typeof s.epsLastYear === 'number' && s.epsLastYear > 0 &&
+              typeof s.epsQ1 === 'number' && s.epsQ1 > 0 &&
+              typeof s.epsQ2 === 'number' && s.epsQ2 > 0 &&
+              typeof s.epsQ3 === 'number' && s.epsQ3 > 0;
+            if (!positiveEps) return false;
+            if (typeof s.epsProgressRatio !== 'number' || s.epsProgressRatio <= 0.75) return false;
+            if (typeof s.payoutRatio !== 'number' || s.payoutRatio <= 0 || s.payoutRatio > 100) return false;
+            if (typeof s.expectedYield !== 'number' || s.expectedYield < 5) return false;
+          }
+          if (kw) {
+            const hit =
+              String(s.code).toLowerCase().includes(kw) ||
+              String(s.name).toLowerCase().includes(kw) ||
+              String(s.market || '').toLowerCase().includes(kw) ||
+              (s.category && String(s.category).toLowerCase().includes(kw));
+            if (!hit) return false;
+          }
+          if (minCash !== null && (s.cashYield === null || s.cashYield === undefined || s.cashYield < minCash)) return false;
+          if (minTotal !== null && (s.totalYield === null || s.totalYield === undefined || s.totalYield < minTotal)) return false;
+          if (minPayout !== null && !Number.isNaN(minPayout) && (s.payoutRatio === null || s.payoutRatio === undefined || s.payoutRatio < minPayout)) return false;
+          if (maxPayout !== null && !Number.isNaN(maxPayout) && (s.payoutRatio === null || s.payoutRatio === undefined || s.payoutRatio > maxPayout)) return false;
+          if (minDivCount !== null && (s.divCount10Y === null || s.divCount10Y === undefined || s.divCount10Y < minDivCount)) return false;
+          if (minAvgDiv !== null && (s.avgDiv10Y === null || s.avgDiv10Y === undefined || s.avgDiv10Y < minAvgDiv)) return false;
+          if (maxPe !== null && (s.peRatio === null || s.peRatio === undefined || s.peRatio > maxPe)) return false;
+          if (maxPb !== null && (s.pbRatio === null || s.pbRatio === undefined || s.pbRatio > maxPb)) return false;
+          if (minInsider !== null && (s.insiderHolding === null || s.insiderHolding === undefined || s.insiderHolding < minInsider)) return false;
+          if (minEpsProgress !== null && (s.epsProgressRatio === null || s.epsProgressRatio === undefined || s.epsProgressRatio < minEpsProgress)) return false;
+          if (minExpectedYield !== null && (s.expectedYield === null || s.expectedYield === undefined || s.expectedYield < minExpectedYield)) return false;
+          if (exMonth !== null) {
+            if (!s.exDividendDate || s.exDividendDate === '-') return false;
+            const m = parseInt(String(s.exDividendDate).split(/[\/\-]/)[1], 10);
+            if (m !== exMonth) return false;
+          }
+          return true;
+        });
+
+        const col = COLUMNS.find(c => c.key === sortKey);
+        const dir = sortDirection === 'asc' ? 1 : -1;
+
+        return filtered.sort((a, b) => {
+          const va = a[sortKey];
+          const vb = b[sortKey];
+          if (col && col.type === 'date') {
+            const ea = !va || va === '-';
+            const eb = !vb || vb === '-';
+            if (ea && eb) return 0;
+            if (ea) return 1;
+            if (eb) return -1;
+            return String(va).localeCompare(String(vb)) * dir;
+          }
+          if (col && (col.type === 'code' || col.type === 'text' || col.type === 'market')) {
+            return String(va || '').localeCompare(String(vb || ''), 'zh-Hant-TW', { numeric: true }) * dir;
+          }
+          const na = va === null || va === undefined || isNaN(va);
+          const nb = vb === null || vb === undefined || isNaN(vb);
+          if (na && nb) return 0;
+          if (na) return 1;
+          if (nb) return -1;
+          return (Number(va) - Number(vb)) * dir;
+        });
+      }
+
+      function renderHeader() {
+        const thead = document.getElementById('table-head');
+        let html = '<tr>';
+        COLUMNS.forEach((col, idx) => {
+          const isSorted = sortKey === col.key;
+          const isSticky = col.stickyLeft !== undefined;
+          const isLastSticky = idx === 2;
+
+          html += `
+            <th scope="col" style="${isSticky ? `left: ${col.stickyLeft}px;` : ''}"
+                class="sticky top-0 select-none border-b border-slate-300 p-0 whitespace-nowrap ${col.minWidth}
+                       ${isSticky ? 'z-30' : 'z-20'}
+                       ${isLastSticky ? 'border-r border-slate-400/70 shadow-[3px_0_6px_-3px_rgba(15,23,42,0.18)]' : 'border-r border-slate-200/20'}
+                       ${isSorted ? 'bg-[#122642] text-white' : 'bg-[#1E3A5F] text-slate-100 hover:bg-[#173050]'}">
+              <button type="button" data-key="${col.key}"
+                      class="sort-th-btn w-full h-10 px-2.5 flex items-center gap-1 font-semibold text-xs tracking-wide cursor-pointer
+                             ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}">
+                <span>${col.label}</span>
+                <span class="inline-flex flex-col leading-none text-[8px] ml-0.5">
+                  <span class="${isSorted && sortDirection === 'asc' ? 'text-amber-300 opacity-100 font-bold' : 'text-slate-300 opacity-35'}">▲</span>
+                  <span class="${isSorted && sortDirection === 'desc' ? 'text-amber-300 opacity-100 font-bold' : 'text-slate-300 opacity-35'}">▼</span>
+                </span>
+              </button>
+            </th>
+          `;
+        });
+        html += '</tr>';
+        thead.innerHTML = html;
+
+        document.querySelectorAll('.sort-th-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            if (sortKey === key) {
+              sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+            } else {
+              sortKey = key;
+              const c = COLUMNS.find(x => x.key === key);
+              sortDirection = (c && (c.type === 'market' || c.type === 'code' || c.type === 'text' || c.type === 'date')) ? 'asc' : 'desc';
+            }
+            currentPage = 1;
+            scrollTableTop();
+            render();
+          });
+        });
+      }
+
+      function renderBody(rows) {
+        const tbody = document.getElementById('table-body');
+        if (rows.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="${COLUMNS.length}" class="py-16 px-6 text-center bg-white">
+                <div class="max-w-sm mx-auto space-y-3">
+                  <p class="text-sm font-semibold text-slate-800">沒有符合目前篩選條件的台股標的</p>
+                  <p class="text-xs text-slate-500">請嘗試放寬市場別、殖利率、本益比、除息月份或關鍵字條件。</p>
+                  <button type="button" id="empty-reset-btn" class="inline-flex items-center justify-center h-9 px-4 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132847] rounded-md transition-colors cursor-pointer">
+                    清除所有篩選條件
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+          document.getElementById('empty-reset-btn')?.addEventListener('click', resetFilters);
+          return;
+        }
+
+        let html = '';
+        rows.forEach((stock, rIdx) => {
+          const isEven = rIdx % 2 === 0;
+          const rowBg = isEven ? 'bg-white' : 'bg-[#F8FAFC]';
+
+          html += `<tr class="group ${rowBg} hover:bg-[#EDF4FF] transition-colors duration-100">`;
+          COLUMNS.forEach((col, cIdx) => {
+            const isSticky = col.stickyLeft !== undefined;
+            const isLastSticky = cIdx === 2;
+            const isSortedCol = sortKey === col.key;
+            const rawVal = stock[col.key];
+            const formatted = formatValue(stock, col);
+
+            const isHighYield = col.isHighYieldCol && typeof rawVal === 'number' && rawVal > 5;
+            const isNegative = (col.type === 'number' || col.type === 'percent') && typeof rawVal === 'number' && rawVal < 0;
+            const isEmpty = formatted === '-';
+            const bench = (stock.epsQuarters || 3) / 4;
+
+            let textClass = 'text-slate-700';
+            if (col.key === 'market') {
+              textClass = formatted === '上櫃' ? 'text-[#0F766E] font-medium' : 'text-[#1B365D] font-medium';
+            } else if (col.key === 'code') {
+              textClass = 'font-mono tabular-nums font-semibold text-[#1B365D]';
+            } else if (col.key === 'name') {
+              textClass = 'font-medium text-slate-900';
+            } else if (col.key === 'capReserveStockDiv') {
+              textClass = typeof rawVal === 'number' && rawVal > 0
+                ? 'font-mono tabular-nums font-semibold text-amber-700'
+                : isEmpty ? 'font-mono text-slate-300' : 'font-mono tabular-nums text-slate-400';
+            } else if (col.key === 'epsProgressRatio' && typeof rawVal === 'number') {
+              if (rawVal > bench) textClass = 'font-mono tabular-nums font-semibold text-[#991B1B]';
+              else if (rawVal < bench) textClass = 'font-mono tabular-nums text-emerald-700';
+              else textClass = 'font-mono tabular-nums text-slate-800';
+            } else if (isHighYield) {
+              textClass = 'font-mono tabular-nums font-bold text-[#991B1B]';
+            } else if (isNegative) {
+              textClass = 'font-mono tabular-nums text-emerald-700';
+            } else if (isEmpty) {
+              textClass = 'font-mono text-slate-300';
+            } else if (col.type !== 'text') {
+              textClass = 'font-mono tabular-nums text-slate-800';
+            }
+
+            const stickyClass = isSticky ? `sticky z-10 ${rowBg} group-hover:bg-[#EDF4FF]` :
+                                isSortedCol ? 'bg-[#1B365D]/[0.03] group-hover:bg-[#EDF4FF]' : '';
+
+            let titleAttr = '';
+            if (col.key === 'name' && stock.category) {
+              titleAttr = `title="${stock.market} ${stock.code} ${stock.name}（${stock.category}）"`;
+            } else if (col.key === 'realYield' && stock.preExPrice) {
+              titleAttr = `title="依除息前一日收盤價 ${stock.preExPrice} 元計算（多季配息為各次合計）"`;
+            } else if (col.key === 'epsProgressRatio' && rawVal !== null && rawVal !== undefined) {
+              titleAttr = `title="今年累積EPS ${stock.epsYTD} ÷ 去年EPS ${stock.epsLastYear}（已公布 ${stock.epsQuarters || 3} 季，基準 ${bench.toFixed(2)}）"`;
+            } else if (col.key === 'expectedDividend' && rawVal !== null && rawVal !== undefined && stock.epsYTD != null && stock.epsLastYear) {
+              titleAttr = `title="預估今年EPS ${(stock.epsYTD / bench).toFixed(2)} × 現金配息率 ${((stock.cashDividend / stock.epsLastYear) * 100).toFixed(1)}%"`;
+            } else if (col.key === 'expectedYield' && rawVal !== null && rawVal !== undefined && stock.expectedDividend != null && stock.price) {
+              titleAttr = `title="明年預期配息 ${stock.expectedDividend} ÷ 最新股價 ${stock.price}"`;
+            }
+
+            html += `
+              <td ${titleAttr} style="${isSticky ? `left: ${col.stickyLeft}px;` : ''}"
+                  class="h-[38px] px-2.5 border-b border-slate-200/80 whitespace-nowrap transition-colors duration-100 ${col.minWidth}
+                         ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+                         ${stickyClass}
+                         ${isLastSticky ? 'border-r border-slate-300 shadow-[3px_0_6px_-3px_rgba(15,23,42,0.12)]' : 'border-r border-slate-100'}
+                         ${textClass}">
+                ${formatted}
+              </td>
+            `;
+          });
+          html += '</tr>';
+        });
+        tbody.innerHTML = html;
+      }
+
+      function updateSummaryAndPagination(filteredRows) {
+        const totalFiltered = filteredRows.length;
+        const listedCount = filteredRows.filter(s => s.market === '上市').length;
+        const otcCount = filteredRows.filter(s => s.market === '上櫃').length;
+
+        document.getElementById('stat-count').textContent = totalFiltered;
+        document.getElementById('stat-total').textContent = allStocks.length;
+        document.getElementById('stat-listed').textContent = listedCount;
+        document.getElementById('stat-otc').textContent = otcCount;
+
+        const yields = filteredRows.map(s => s.cashYield).filter(v => typeof v === 'number');
+        const avg = yields.length > 0 ? (yields.reduce((a, b) => a + b, 0) / yields.length).toFixed(2) : '0.00';
+        document.getElementById('stat-avg-yield').textContent = avg + '%';
+
+        const over5 = yields.filter(y => y > 5).length;
+        document.getElementById('stat-over5').textContent = over5;
+
+        const col = COLUMNS.find(c => c.key === sortKey);
+        const colLabel = col ? col.label : sortKey;
+        const dirLabel = sortDirection === 'desc' ? '降冪 ▼' : '升冪 ▲';
+        document.getElementById('stat-sort').textContent = `${colLabel}（${dirLabel}）`;
+
+        const effectiveSize = pageSize === 0 ? Math.max(totalFiltered, 1) : pageSize;
+        const totalPages = Math.max(1, Math.ceil(totalFiltered / effectiveSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIdx = totalFiltered === 0 ? 0 : (currentPage - 1) * effectiveSize + 1;
+        const endIdx = totalFiltered === 0 ? 0 : (pageSize === 0 ? totalFiltered : Math.min(totalFiltered, currentPage * effectiveSize));
+
+        document.getElementById('page-range-info').textContent = `顯示第 ${startIdx}–${endIdx} 筆，共 ${totalFiltered} 筆`;
+        document.getElementById('page-indicator').textContent = `第 ${currentPage} / ${totalPages} 頁`;
+
+        document.getElementById('page-first-btn').disabled = currentPage <= 1 || totalFiltered === 0;
+        document.getElementById('page-prev-btn').disabled = currentPage <= 1 || totalFiltered === 0;
+        document.getElementById('page-next-btn').disabled = currentPage >= totalPages || totalFiltered === 0;
+        document.getElementById('page-last-btn').disabled = currentPage >= totalPages || totalFiltered === 0;
+      }
+
+      function scrollTableTop() {
+        const container = document.getElementById('table-scroll-container');
+        if (container) container.scrollTop = 0;
+      }
+
+      function render() {
+        renderHeader();
+        const filteredRows = getFilteredAndSorted();
+        lastFilteredRows = filteredRows;
+
+        updateSummaryAndPagination(filteredRows);
+
+        const pagedRows = pageSize === 0
+          ? filteredRows
+          : filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+        renderBody(pagedRows);
+      }
+
+      // Debounced keyword input for silky-smooth typing on 2,300+ rows
+      let kwTimer = null;
+      document.getElementById('keyword-input').addEventListener('input', (e) => {
+        filters.keyword = e.target.value;
+        const clearBtn = document.getElementById('clear-kw-btn');
+        if (filters.keyword) {
+          clearBtn.classList.remove('hidden');
+          clearBtn.classList.add('flex');
+        } else {
+          clearBtn.classList.add('hidden');
+          clearBtn.classList.remove('flex');
+        }
+        clearTimeout(kwTimer);
+        kwTimer = setTimeout(() => {
+          currentPage = 1;
+          scrollTableTop();
+          render();
+        }, 150);
+      });
+
+      document.getElementById('clear-kw-btn').addEventListener('click', () => {
+        filters.keyword = '';
+        document.getElementById('keyword-input').value = '';
+        document.getElementById('clear-kw-btn').classList.add('hidden');
+        document.getElementById('clear-kw-btn').classList.remove('flex');
+        currentPage = 1;
+        scrollTableTop();
+        render();
+      });
+
+      // Market filter segmented pills
+      function updateMarketPills(activeMarket) {
+        document.querySelectorAll('.market-pill').forEach(btn => {
+          const isAct = btn.getAttribute('data-market') === activeMarket;
+          btn.className = `market-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+            isAct ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+          }`;
+        });
+      }
+
+      document.querySelectorAll('.market-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filters.market = btn.getAttribute('data-market');
+          updateMarketPills(filters.market);
+          currentPage = 1;
+          scrollTableTop();
+          updateFilterStatusText();
+          render();
+        });
+      });
+
+      // Asset type segmented pills
+      function updateAssetPills(activeAsset) {
+        document.querySelectorAll('.asset-pill').forEach(btn => {
+          const isAct = btn.getAttribute('data-asset') === activeAsset;
+          btn.className = `asset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+            isAct ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+          }`;
+        });
+      }
+
+      document.querySelectorAll('.asset-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filters.assetType = btn.getAttribute('data-asset');
+          updateAssetPills(filters.assetType);
+          currentPage = 1;
+          scrollTableTop();
+          updateFilterStatusText();
+          render();
+        });
+      });
+
+      function updateFilterStatusText() {
+        const descEl = document.getElementById('filter-status-desc');
+        let activeCount = 0;
+        if (filters.keyword.trim()) activeCount++;
+        if (filters.market !== 'all') activeCount++;
+        if (filters.assetType !== 'all') activeCount++;
+        if (filters.qualityDividendOnly) activeCount++;
+        ['minCashYield', 'minTotalYield', 'minPayoutRatio', 'maxPayoutRatio', 'minDivCount10Y', 'minAvgDiv10Y', 'maxPeRatio', 'maxPbRatio', 'minInsiderHolding', 'minEpsProgress', 'minExpectedYield', 'exDividendMonth'].forEach(k => {
+          if (filters[k] !== '') activeCount++;
+        });
+        if (filters.qualityDividendOnly) {
+          descEl.className = 'flex items-center gap-2 text-xs font-semibold text-blue-700';
+          descEl.textContent = `已啟用「配息優股」條件（去年與今年Q1~Q3 EPS皆>0 · 業績進度X>0.75 · 配息率≤100% · 明年預期殖利率≥5%${activeCount > 4 ? `，共 ${activeCount} 項條件` : ''}）`;
+        } else {
+          descEl.className = 'flex items-center gap-2 text-xs text-slate-500';
+          descEl.textContent = activeCount > 0
+            ? `目前已啟用 ${activeCount} 項篩選條件`
+            : '尚未設定數值或月份篩選條件';
+        }
+      }
+
+      document.getElementById('filter-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyFilterInputs();
+      });
+
+      function applyFilterInputs() {
+        filters.minCashYield = document.getElementById('filter-minCashYield').value;
+        filters.minTotalYield = document.getElementById('filter-minTotalYield').value;
+        filters.minPayoutRatio = document.getElementById('filter-minPayoutRatio').value;
+        filters.maxPayoutRatio = document.getElementById('filter-maxPayoutRatio').value;
+        filters.minDivCount10Y = document.getElementById('filter-minDivCount10Y').value;
+        filters.minAvgDiv10Y = document.getElementById('filter-minAvgDiv10Y').value;
+        filters.maxPeRatio = document.getElementById('filter-maxPeRatio').value;
+        filters.maxPbRatio = document.getElementById('filter-maxPbRatio').value;
+        filters.minInsiderHolding = document.getElementById('filter-minInsiderHolding').value;
+        filters.minEpsProgress = document.getElementById('filter-minEpsProgress').value;
+        filters.minExpectedYield = document.getElementById('filter-minExpectedYield').value;
+        filters.exDividendMonth = document.getElementById('filter-exDividendMonth').value;
+
+        updateFilterStatusText();
+        currentPage = 1;
+        scrollTableTop();
+        render();
+      }
+
+      function resetFilters() {
+        filters = {
+          keyword: '', market: 'all', assetType: 'all', qualityDividendOnly: false,
+          minCashYield: '', minTotalYield: '', minPayoutRatio: '', maxPayoutRatio: '', minDivCount10Y: '',
+          minAvgDiv10Y: '', maxPeRatio: '', maxPbRatio: '', minInsiderHolding: '',
+          minEpsProgress: '', minExpectedYield: '', exDividendMonth: ''
+        };
+        document.getElementById('keyword-input').value = '';
+        document.getElementById('clear-kw-btn').classList.add('hidden');
+        document.getElementById('clear-kw-btn').classList.remove('flex');
+        document.getElementById('filter-minCashYield').value = '';
+        document.getElementById('filter-minTotalYield').value = '';
+        document.getElementById('filter-minPayoutRatio').value = '';
+        document.getElementById('filter-maxPayoutRatio').value = '';
+        document.getElementById('filter-minDivCount10Y').value = '';
+        document.getElementById('filter-minAvgDiv10Y').value = '';
+        document.getElementById('filter-maxPeRatio').value = '';
+        document.getElementById('filter-maxPbRatio').value = '';
+        document.getElementById('filter-minInsiderHolding').value = '';
+        document.getElementById('filter-minEpsProgress').value = '';
+        document.getElementById('filter-minExpectedYield').value = '';
+        document.getElementById('filter-exDividendMonth').value = '';
+
+        updateMarketPills('all');
+        updateAssetPills('all');
+        updatePresetButtons('all');
+        updateFilterStatusText();
+        currentPage = 1;
+        scrollTableTop();
+        render();
+      }
+      document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
+      document.getElementById('brand-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        resetFilters();
+      });
+
+      // Presets
+      function updatePresetButtons(activeId) {
+        document.querySelectorAll('.preset-pill').forEach(btn => {
+          const id = btn.getAttribute('data-preset');
+          if (id === 'quality-dividend') {
+            btn.className = id === activeId
+              ? 'preset-pill px-3 py-1 text-xs font-bold text-blue-900 bg-blue-200/90 border-2 border-blue-700 rounded whitespace-nowrap shrink-0 shadow-xs transition-colors cursor-pointer'
+              : 'preset-pill px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border-2 border-blue-500 rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer';
+          } else if (id === activeId) {
+            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white text-[#1B365D] shadow-xs';
+          } else {
+            btn.className = 'preset-pill px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-600 hover:text-slate-900';
+          }
+        });
+      }
+
+      function applyPreset(presetId) {
+        resetFilters();
+        if (presetId === 'quality-dividend') {
+          filters.qualityDividendOnly = true;
+          document.getElementById('filter-maxPayoutRatio').value = '100';
+          document.getElementById('filter-minEpsProgress').value = '0.75';
+          document.getElementById('filter-minExpectedYield').value = '5';
+          filters.maxPayoutRatio = '100';
+          filters.minEpsProgress = '0.75';
+          filters.minExpectedYield = '5';
+          sortKey = 'expectedYield';
+          sortDirection = 'desc';
+        } else if (presetId === 'high-yield-5') {
+          document.getElementById('filter-minCashYield').value = '5';
+          filters.minCashYield = '5';
+        } else if (presetId === 'growth-yield') {
+          document.getElementById('filter-minEpsProgress').value = '0.75';
+          document.getElementById('filter-minExpectedYield').value = '5';
+          filters.minEpsProgress = '0.75';
+          filters.minExpectedYield = '5';
+        } else if (presetId === 'steady-10y') {
+          document.getElementById('filter-minTotalYield').value = '4';
+          document.getElementById('filter-minDivCount10Y').value = '10';
+          filters.minTotalYield = '4';
+          filters.minDivCount10Y = '10';
+        } else if (presetId === 'value-pe') {
+          document.getElementById('filter-minTotalYield').value = '4';
+          document.getElementById('filter-maxPeRatio').value = '17';
+          document.getElementById('filter-maxPbRatio').value = '2';
+          filters.minTotalYield = '4';
+          filters.maxPeRatio = '17';
+          filters.maxPbRatio = '2';
+        } else if (presetId === 'july-ex') {
+          document.getElementById('filter-exDividendMonth').value = '7';
+          filters.exDividendMonth = '7';
+        }
+        applyFilterInputs();
+        updatePresetButtons(presetId);
+      }
+
+      document.querySelectorAll('.preset-pill, .preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyPreset(btn.getAttribute('data-preset'));
+        });
+      });
+
+      // Pagination event handlers
+      document.getElementById('page-size-select').addEventListener('change', (e) => {
+        pageSize = parseInt(e.target.value, 10) || 0;
+        currentPage = 1;
+        scrollTableTop();
+        render();
+      });
+
+      document.getElementById('page-first-btn').addEventListener('click', () => {
+        currentPage = 1;
+        scrollTableTop();
+        render();
+      });
+
+      document.getElementById('page-prev-btn').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          scrollTableTop();
+          render();
+        }
+      });
+
+      document.getElementById('page-next-btn').addEventListener('click', () => {
+        const effectiveSize = pageSize === 0 ? Math.max(lastFilteredRows.length, 1) : pageSize;
+        const totalPages = Math.max(1, Math.ceil(lastFilteredRows.length / effectiveSize));
+        if (currentPage < totalPages) {
+          currentPage++;
+          scrollTableTop();
+          render();
+        }
+      });
+
+      document.getElementById('page-last-btn').addEventListener('click', () => {
+        const effectiveSize = pageSize === 0 ? Math.max(lastFilteredRows.length, 1) : pageSize;
+        currentPage = Math.max(1, Math.ceil(lastFilteredRows.length / effectiveSize));
+        scrollTableTop();
+        render();
+      });
+
+      // CSV Export (exports ALL filtered rows across pages, including 市場 as column #1)
+      document.getElementById('export-csv-btn').addEventListener('click', () => {
+        const rows = getFilteredAndSorted();
+        if (rows.length === 0) return;
+
+        const escapeCsv = (val) => {
+          if (/[",\n\r]/.test(val)) return `"${val.replace(/"/g, '""')}"`;
+          return val;
+        };
+
+        const headerLine = COLUMNS.map(c => escapeCsv(c.label)).join(',');
+        const dataLines = rows.map(r => COLUMNS.map(c => escapeCsv(formatValue(r, c))).join(','));
+        const csvContent = '\uFEFF' + [headerLine, ...dataLines].join('\r\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        a.href = url;
+        a.download = `全台股殖利率篩選_${dateStr}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Local JSON Load
+      const fileInput = document.getElementById('json-file-input');
+      document.getElementById('upload-json-btn').addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (Array.isArray(data) && data.length > 0) {
+            allStocks = normalizeRecords(data);
+            document.getElementById('data-source-tag').textContent = `資料來源：自訂 ${file.name} (${allStocks.length} 檔)`;
+            renderMetaBar({ updatedAt: `手動匯入（${file.name}）`, priceDate: '-', epsPeriod: '-', total: allStocks.length });
+            resetFilters();
+          } else {
+            alert('JSON 格式必須為陣列，且至少需有一筆資料。');
+          }
+        } catch (err) {
+          alert('解析 JSON 失敗，請確認檔案格式是否正確。');
+        }
+      });
+
+      document.getElementById('open-guide-btn').addEventListener('click', () => {
+        alert('【全台股資料來源與更新說明】\n\n1. 資料涵蓋臺灣證券交易所 (上市)、櫃買中心 (上櫃) 及 ETF 共約 2,300+ 檔完整資料。\n2. 雙擊目錄下的「每週更新資料.bat」即可自動從官方 API 批量抓取並同步更新 stocks.json 與 stocks_data.js。\n3. 亦可點擊右上角「載入 JSON」直接匯入本機檔案檢視。');
+      });
+
+      // Start
+      tryLoadJson();
+    </script>
+  </body>
+</html>

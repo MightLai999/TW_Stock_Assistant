@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    font-family: var(--font-sans);
+    color: #0f172a;
+    background-color: #f5f7fa;
+  }
+
+  /* Subtle, crisp scrollbars for wide financial data grids */
+  .table-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .table-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border: 2px solid #f1f5f9;
+    border-radius: 6px;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
