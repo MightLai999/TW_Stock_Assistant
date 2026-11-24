@@ -14,9 +14,19 @@ REM 嘗試尋找本機 Python
 set PYTHON_CMD=python
 where python >nul 2>nul
 if %errorlevel% neq 0 (
-    if exist "%LOCALAPPDATA%\Python\bin\python.exe" (
+    if exist "%LOCALAPPDATA%\Programs\Python\Python315\python.exe" (
+        set PYTHON_CMD="%LOCALAPPDATA%\Programs\Python\Python315\python.exe"
+    ) else if exist "%LOCALAPPDATA%\Python\bin\python.exe" (
         set PYTHON_CMD="%LOCALAPPDATA%\Python\bin\python.exe"
     ) else (
+        for /d %%d in ("%LOCALAPPDATA%\Programs\Python\Python*") do (
+            if exist "%%d\python.exe" set PYTHON_CMD="%%d\python.exe"
+        )
+    )
+)
+if "%PYTHON_CMD%"=="python" (
+    where python >nul 2>nul
+    if %errorlevel% neq 0 (
         echo [錯誤] 找不到 Python 執行檔！請確認系統已安裝 Python。
         pause
         exit /b 1
